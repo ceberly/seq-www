@@ -17,172 +17,111 @@ DrumSound = {
 };
 
 Engine = function(context) {
-	Bus = {
-		Gain: outputContext.createGain(),
+	this.Bus = {
+		Gain: context.createGain(),
 		// reverb isn't working right now.
 		//var reverb: outputContext.createConvolver(),
 		//reverb.connect(gain),
-		Delay: outputContext.createDelay(),
-
-		Dist: outputContext.createWaveShaper(),
-
-		Comp: outputContext.createDynamicsCompressor(),
-
-		HighShelf: outputContext.createBiquadFilter(),
-		HighShelf.type: "highshelf",
-		HighShelf.frequency.value: 8000,
-
-		Peaking: outputContext.createBiquadFilter(),
-		Peaking.type: "peaking",
-		Peaking.frequency.value: 1200,
-
-		LowShelf: outputContext.createBiquadFilter(),
-		LowShelf.type: "lowshelf",
-		LowShelf.frequency.value: 100,
-
-		input: LowShelf,
+		Delay: context.createDelay(),
+		Dist: context.createWaveShaper(),
+		Comp: context.createDynamicsCompressor(),
+		HighShelf: context.createBiquadFilter(),
+		Peaking: context.createBiquadFilter(),
+		LowShelf: context.createBiquadFilter(),
 	};
 
-	Bus.HighShelf.type = "highshelf";
-	Bus.HighShelf.frequency.value = 8000;
+	this.Bus.Input = this.Bus.LowShelf;
 
-	Bus.Peaking.type: "peaking",
-	Bus.Peaking.frequency.value: 1200,
+	this.Bus.HighShelf.type = "highshelf";
+	this.Bus.HighShelf.frequency.value = 8000;
 
-	Bus.LowShelf.type: "lowshelf",
-	LowShelf.frequency.value: 100,
+	this.Bus.Peaking.type = "peaking";
+	this.Bus.Peaking.frequency.value = 1200;
 
-	Dist.amount: 0;
-	Bus.Gain.connect(context.destination);
-	Bus.Delay.connect(Bus.Gain);
-	Bus.Dist.connect(Bus.Delay);
-	Bus.Comp.connect(Bus.Dist);
-	Bus.HighShelf.connect(Bus.Comp);
-	Bus.Peaking.connect(Bus.HighShelf);
-	LowShelf.connect(Bus.Peaking);
+	this.Bus.LowShelf.type = "lowshelf";
+	this.Bus.LowShelf.frequency.value = 100;
 
-	DrumMachine = {
-		BD: {
-			    notes: bus.context.createGain(),
-			    notes.gain.value: 0,
+	this.Bus.Dist.amount = 0;
+	this.Bus.Gain.connect(context.destination);
+	this.Bus.Delay.connect(this.Bus.Gain);
+	this.Bus.Dist.connect(this.Bus.Delay);
+	this.Bus.Comp.connect(this.Bus.Dist);
+	this.Bus.HighShelf.connect(this.Bus.Comp);
+	this.Bus.Peaking.connect(this.Bus.HighShelf);
+	this.Bus.LowShelf.connect(this.Bus.Peaking);
 
-			    osc1: bus.context.createOscillator(),
-			    osc1.frequency.value: 62,
-			    Trigger: function(at) {
-				    notes.gain.exponentialRampToValueAtTime(1, at); // should be a function of overall gain
-				    notes.gain.linearRampToValueAtTime(0, at + .5);
-			    },
-		    },
-		SD: {
-			    notes: bus.context.createGain(),
-			    notes.gain.value: 0,
-
-			    osc1: bus.context.createOscillator(),
-			    osc1.frequency.value: 62,
-			    Trigger: function(at) {
-				    notes.gain.exponentialRampToValueAtTime(1, at); // should be a function of overall gain
-				    notes.gain.linearRampToValueAtTime(0, at + .5);
-			    },
-		    },
-		OH: {
-			    notes: bus.context.createGain(),
-			    notes.gain.value: 0,
-
-			    osc1: bus.context.createOscillator(),
-			    osc1.frequency.value: 62,
-			    Trigger: function(at) {
-				    notes.gain.exponentialRampToValueAtTime(1, at); // should be a function of overall gain
-				    notes.gain.linearRampToValueAtTime(0, at + .5);
-			    },
-		    },
-		CH: {
-			    notes: bus.context.createGain(),
-			    notes.gain.value: 0,
-
-			    osc1: bus.context.createOscillator(),
-			    osc1.frequency.value: 62,
-			    Trigger: function(at) {
-				    notes.gain.exponentialRampToValueAtTime(1, at); // should be a function of overall gain
-				    notes.gain.linearRampToValueAtTime(0, at + .5);
-			    },
-		    },
+	this.DrumMachine = {
+		BD: function() {
+			var osc1 = context.createOscillator().frequency.value = 62;
+			this.Trigger = function(at) {
+				osc1.start(at);
+				osc1.stop(at + .5);
+			};
+		},
+		SD: function() {
+			var osc1 = context.createOscillator().frequency.value = 62;
+			this.Trigger = function(at) {
+				osc1.start(at);
+				osc1.stop(at + .5);
+			};
+		},
+		CH: function() {
+			var osc1 = context.createOscillator().frequency.value = 62;
+			this.Trigger = function(at) {
+				osc1.start(at);
+				osc1.stop(at + .5);
+			};
+		},
+		OH: function() {
+			var osc1 = context.createOscillator().frequency.value = 62;
+			this.Trigger = function(at) {
+				osc1.start(at);
+				osc1.stop(at + .5);
+			};
+		},
 		LoadSequence: function(sequence) {
-				      $(".drummachine-lane > .note").data("on", false);
-				      for (var i = 0; i < sequence.length; i++) {
-					      switch (sequence[i].what) {
-						      case DrumSound.BD:
-							      $($("#drummachine-sequencer-bd > .note")[sequence[i].when - 1]).data("on", true);
-							      $($("#drummachine-sequencer-bd > .note")[sequence[i].when - 1]).css("background-color", "red");
-							      break;
-						      case DrumSound.SD:
-							      $($("#drummachine-sequencer-sd > .note")[sequence[i].when - 1]).data("on", true);
-							      $($("#drummachine-sequencer-sd > .note")[sequence[i].when - 1]).css("background-color", "red");
-							      break;
-						      case DrumSound.CH:
-							      $($("#drummachine-sequencer-ch > .note")[sequence[i].when - 1]).data("on", true);
-							      $($("#drummachine-sequencer-ch > .note")[sequence[i].when - 1]).css("background-color", "red");
-							      break;
-						      case DrumSound.OH:
-							      $($("#drummachine-sequencer-oh > .note")[sequence[i].when - 1]).data("on", true);
-							      $($("#drummachine-sequencer-oh > .note")[sequence[i].when - 1]).css("background-color", "red");
-							      break;
-						      default:
-							      console.log("Unexpected drum sound: " + sequence[i].what.toString());
-					      }
-				      }
-			      },
-	}
+			$(".drummachine-lane > .note").data("on", false);
+			for (var i = 0; i < sequence.length; i++) {
+				switch (sequence[i].what) {
+					case DrumSound.BD:
+						$($("#drummachine-sequencer-bd > .note")[sequence[i].when - 1]).data("on", true);
+						$($("#drummachine-sequencer-bd > .note")[sequence[i].when - 1]).css("background-color", "red");
+						break;
+					case DrumSound.SD:
+						$($("#drummachine-sequencer-sd > .note")[sequence[i].when - 1]).data("on", true);
+						$($("#drummachine-sequencer-sd > .note")[sequence[i].when - 1]).css("background-color", "red");
+						break;
+					case DrumSound.CH:
+						$($("#drummachine-sequencer-ch > .note")[sequence[i].when - 1]).data("on", true);
+						$($("#drummachine-sequencer-ch > .note")[sequence[i].when - 1]).css("background-color", "red");
+						break;
+					case DrumSound.OH:
+						$($("#drummachine-sequencer-oh > .note")[sequence[i].when - 1]).data("on", true);
+						$($("#drummachine-sequencer-oh > .note")[sequence[i].when - 1]).css("background-color", "red");
+						break;
+					default:
+						console.log("Unexpected drum sound: " + sequence[i].what.toString());
+				}
+			}
+		},
+	};
 
-	BD.notes.connect(Bus.input);
-	BD.osc1.connect(BD.notes);
-	BD.osc1.start(0);
-	SD.notes.connect(Bus.input);
-	SD.osc1.connect(SD.notes);
-	SD.osc1.start(0);
-	OH.notes.connect(Bus.input);
-	OH.osc1.connect(OH.notes);
-	OH.osc1.start(0);
-	CH.notes.connect(Bus.input);
-	CH.osc1.connect(CH.notes);
-	CH.osc1.start(0);
 
-	for (var i = 0; i < 16; i++) {
-		$("#drummachine-sequencer-oh").append('<button class="note"></button>').data("note", DrumMachine.OH);
-		$("#drummachine-sequencer-ch").append('<button class="note"></button>').data("note", DrumMachine.CH);
-		$("#drummachine-sequencer-sd").append('<button class="note"></button>').data("note", DrumMachine.SD);
-		$("#drummachine-sequencer-bd").append('<button class="note"></button>').data("note", DrumMachine.BD);
-	}
-
-	Lead = function(bus) {
-		var self = this;
-
-		self.LP = bus.context.createBiquadFilter();
-		self.LP.connect(bus.input);
-		self.LP.frequency.value = 5000;
-		self.LP.Q.value = 1;
-
-		self.SawGain = bus.context.createGain();
-		self.SawGain.connect(self.LP);
-
-		self.SquareGain = bus.context.createGain();
-		self.SquareGain.connect(self.LP);
-
-		self.SawDetune = 0;
-		self.SquareDetune = 0;
-
-		self.Note = function(canonical, octave) {
+	this.Poly = {
+		LP: context.createBiquadFilter(),
+		SawGain: context.createGain(),
+		SquareGain: context.createGain(),
+		SawDetune: 0,
+		SquareDetune: 0,
+		Note: function(canonical, octave) {
 			this.osc = function(frequency) {
-				var osc1 = bus.context.createOscillator();
+				var osc1 = context.createOscillator();
 				osc1.type = "sawtooth";
 				osc1.frequency.value = frequency;
-				osc1.detune.value = self.SawDetune;
-				osc1.connect(self.SawGain);
 
-				var osc2 = bus.context.createOscillator();
+				var osc2 = context.createOscillator();
 				osc2.type = "square";
 				osc2.frequency.value = frequency;
-				osc2.detune.value = self.SquareDetune;
-				osc2.connect(self.SquareGain);
 
 				return [osc1, osc2];
 			}
@@ -240,21 +179,39 @@ Engine = function(context) {
 			this.toString = function() {
 				return canonical;
 			}
-		}
-
-		self.Sequence = [];
-
-		self.LoadSequence = function(sequence) {
+		},
+		LoadSequence: function(sequence) {
 			self.Sequence = sequence;
 
 			for (var i = 0; i < sequence.length; i++) {
-				$("#lead-note-" + sequence[i].what.toString().replace(/#/, "s").toLowerCase() + sequence[i].when).data("note", sequence[i]);
-				$("#lead-note-" + sequence[i].what.toString().replace(/#/, "s").toLowerCase() + sequence[i].when).css("background-color", ColorRed);
+				$("#poly-note-" + sequence[i].what.toString().replace(/#/, "s").toLowerCase() + sequence[i].when).data("note", sequence[i]);
+				$("#poly-note-" + sequence[i].what.toString().replace(/#/, "s").toLowerCase() + sequence[i].when).css("background-color", ColorRed);
 			}
-		}
+		},
+	};
+
+
+	for (var i = 0; i < 16; i++) {
+		$("#drummachine-sequencer-oh").append('<button class="note"></button>').data("note", new this.DrumMachine.OH());
+		$("#drummachine-sequencer-ch").append('<button class="note"></button>').data("note", new this.DrumMachine.CH());
+		$("#drummachine-sequencer-sd").append('<button class="note"></button>').data("note", new this.DrumMachine.SD());
+		$("#drummachine-sequencer-bd").append('<button class="note"></button>').data("note", new this.DrumMachine.BD());
+
+		$("#poly-lane-b").append('<button class="note"></button>');
+		$("#poly-lane-as").append('<button class="note"></button>');
+		$("#poly-lane-a").append('<button class="note"></button>');
+		$("#poly-lane-gs").append('<button class="note"></button>');
+		$("#poly-lane-g").append('<button class="note"></button>');
+		$("#poly-lane-fs").append('<button class="note"></button>');
+		$("#poly-lane-f").append('<button class="note"></button>');
+		$("#poly-lane-e").append('<button class="note"></button>');
+		$("#poly-lane-ds").append('<button class="note"></button>');
+		$("#poly-lane-d").append('<button class="note"></button>');
+		$("#poly-lane-cs").append('<button class="note"></button>');
+		$("#poly-lane-c").append('<button class="note"></button>');
 	}
 
-	function LoadSequence(context, drumMachine, lead, tempo) {
+	this.LoadSequence = function(context, tempo) {
 		// assume 16th notes for the time being.
 		var tickTime = 60 / tempo / 4;
 		var t = false;
@@ -283,81 +240,81 @@ Engine = function(context) {
 		});
 	}
 
-	function SetupUI(bus, drummachine, lead) {
+	this.SetupUI = function(bus, drummachine, poly) {
 		var master_knob_width = 50;
 		var drum_control_knob_width = 50;
-		var lead_control_knob_width = 50;
+		var poly_control_knob_width = 50;
 
 		$("#master-gain > input").knob({
 			"width": master_knob_width,
-			"min": bus.Gain.gain.minValue * 100,
-			"max": bus.Gain.gain.maxValue * 100,
-			"value": bus.Gain.gain.value,
-			"change": function(v) { bus.Gain.gain.value = (v / 100); }
+			"min": this.Bus.Gain.gain.minValue * 100,
+			"max": this.Bus.Gain.gain.maxValue * 100,
+			"value": this.Bus.Gain.gain.value,
+			"change": function(v) { this.Bus.Gain.gain.value = (v / 100); }
 		});
 
 		$("#master-eq-high > input").knob({
 			"width": master_knob_width,
-			"min": bus.HighShelf.gain.minValue,
-			"max": bus.HighShelf.gain.maxValue,
+			"min": this.Bus.HighShelf.gain.minValue,
+			"max": this.Bus.HighShelf.gain.maxValue,
 			"value": 0,
-			"change": function(v) { bus.HighShelf.gain.value = v; }
+			"change": function(v) { this.Bus.HighShelf.gain.value = v; }
 		});
 
 		$("#master-eq-low > input").knob({
 			"width": master_knob_width,
-			"min": bus.LowShelf.gain.minValue,
-			"max": bus.LowShelf.gain.maxValue,
+			"min": this.Bus.LowShelf.gain.minValue,
+			"max": this.Bus.LowShelf.gain.maxValue,
 			"value": 0,
-			"change": function(v) { bus.LowShelf.gain.value = v; }
+			"change": function(v) { this.Bus.LowShelf.gain.value = v; }
 		});
 
 		$("#master-eq-mid > input").knob({
 			"width": master_knob_width,
-			"min": bus.Peaking.gain.minValue,
-			"max": bus.Peaking.gain.maxValue,
+			"min": this.Bus.Peaking.gain.minValue,
+			"max": this.Bus.Peaking.gain.maxValue,
 			"value": 0,
-			"change": function(v) { bus.Peaking.gain.value = v; }
+			"change": function(v) { this.Bus.Peaking.gain.value = v; }
 		});
 
 		$("#master-comp-threshold > input").knob({
 			"width": master_knob_width,
-			"min": bus.Comp.threshold.minValue,
-			"max": bus.Comp.threshold.maxValue,
-			"value": bus.Comp.threshold.value,
-			"change": function(v) { bus.Comp.threshold.value = v; }
+			"min": this.Bus.Comp.threshold.minValue,
+			"max": this.Bus.Comp.threshold.maxValue,
+			"value": this.Bus.Comp.threshold.value,
+			"change": function(v) { this.Bus.Comp.threshold.value = v; }
 		});
 
 		$("#master-comp-ratio > input").knob({
 			"width": master_knob_width,
-			"min": bus.Comp.ratio.minValue,
-			"max": bus.Comp.ratio.maxValue,
-			"value": bus.Comp.ratio.value,
-			"change": function(v) { bus.Comp.ratio.value = v; }
+			"min": this.Bus.Comp.ratio.minValue,
+			"max": this.Bus.Comp.ratio.maxValue,
+			"value": this.Bus.Comp.ratio.value,
+			"change": function(v) { this.Bus.Comp.ratio.value = v; }
 		});
 
 		$("#master-comp-attack > input").knob({
 			"width": master_knob_width,
-			"min": bus.Comp.attack.minValue,
-			"max": bus.Comp.attack.maxValue,
-			"value": bus.Comp.attack.value,
-			"change": function(v) { bus.Comp.attack.value = v; }
+			"min": this.Bus.Comp.attack.minValue,
+			"max": this.Bus.Comp.attack.maxValue,
+			"value": this.Bus.Comp.attack.value,
+			"change": function(v) { this.Bus.Comp.attack.value = v; }
 		});
 
 		$("#master-comp-release > input").knob({
 			"width": master_knob_width,
-			"min": bus.Comp.release.minValue,
-			"max": bus.Comp.release.maxValue,
-			"value": bus.Comp.release.value,
-			"change": function(v) { bus.Comp.release.value = v; }
+			"min": this.Bus.Comp.release.minValue,
+			"max": this.Bus.Comp.release.maxValue,
+			"value": this.Bus.Comp.release.value,
+			"change": function(v) { this.Bus.Comp.release.value = v; }
 		});
 
 		$("#master-dist-amount > input").knob({
 			"width": master_knob_width,
 			"min": 0,
 			"max": 100,
-			"value": bus.Dist.amount,
-			"change": function(v) { bus.Dist.amount = v; }
+			"value": this.Bus.Dist.amount,
+			"change": function(v) { this.Bus.Dist.amount = v; }
 		});
 
 
@@ -372,46 +329,46 @@ Engine = function(context) {
 
 
 		// lead
-		$("#lead-saw-gain > input").knob({
-			"width": lead_control_knob_width,
-			"min": lead.SawGain.gain.minValue,
-			"max": lead.SawGain.gain.maxValue,
-			"value": lead.SawGain.gain.value,
-		});
-
-		$("#lead-square-gain > input").knob({
-			"width": lead_control_knob_width,
-			"min": lead.SquareGain.gain.minValue,
-			"max": lead.SquareGain.gain.maxValue,
-			"value": lead.SquareGain.gain.value,
-		});
-
-		$("#lead-saw-detune > input").knob({
-			"width": lead_control_knob_width,
-			"min": -100,
-			"max": 0,
-			"value": lead.SawDetune,
-		});
-
-		$("#lead-square-detune > input").knob({
-			"width": lead_control_knob_width,
-			"min": -100,
-			"max": 0,
-			"value": lead.SquareDetune,
-		});
-
-		$("#lead-filter-freq > input").knob({
-			"width": lead_control_knob_width,
-			"min": lead.LP.frequency.minValue,
-			"max": lead.LP.frequency.maxValue,
-			"value": lead.LP.frequency.value,
-		});
-
-		$("#lead-filter-q > input").knob({
-			"width": lead_control_knob_width,
-			"min": lead.LP.Q.minValue,
-			"max": lead.LP.Q.maxValue,
-			"value": lead.LP.Q.value,
-		});
+//		$("#lead-saw-gain > input").knob({
+//			"width": lead_control_knob_width,
+//			"min": lead.SawGain.gain.minValue,
+//			"max": lead.SawGain.gain.maxValue,
+//			"value": lead.SawGain.gain.value,
+//		});
+//
+//		$("#lead-square-gain > input").knob({
+//			"width": lead_control_knob_width,
+//			"min": lead.SquareGain.gain.minValue,
+//			"max": lead.SquareGain.gain.maxValue,
+//			"value": lead.SquareGain.gain.value,
+//		});
+//
+//		$("#lead-saw-detune > input").knob({
+//			"width": lead_control_knob_width,
+//			"min": -100,
+//			"max": 0,
+//			"value": lead.SawDetune,
+//		});
+//
+//		$("#lead-square-detune > input").knob({
+//			"width": lead_control_knob_width,
+//			"min": -100,
+//			"max": 0,
+//			"value": lead.SquareDetune,
+//		});
+//
+//		$("#lead-filter-freq > input").knob({
+//			"width": lead_control_knob_width,
+//			"min": lead.LP.frequency.minValue,
+//			"max": lead.LP.frequency.maxValue,
+//			"value": lead.LP.frequency.value,
+//		});
+//
+//		$("#lead-filter-q > input").knob({
+//			"width": lead_control_knob_width,
+//			"min": lead.LP.Q.minValue,
+//			"max": lead.LP.Q.maxValue,
+//			"value": lead.LP.Q.value,
+//		});
 	}
 }

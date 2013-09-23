@@ -20,11 +20,9 @@
 					window.AudioContext = window.AudioContext || window.webkitAudioContext;
 					var context = new AudioContext();
 
-					bus = new Bus(context);
-					drumMachine = new DrumMachine(bus);
-					lead = new Lead(bus);
+					engine = new Engine(context);
 
-					SetupUI(bus, drumMachine, lead);
+					engine.SetupUI(engine.Bus, engine.DrumMachine, engine.Poly);
 
 					sequence = [
 					{ what: DrumSound.BD, when: 1 },
@@ -51,7 +49,7 @@
 					{ what: DrumSound.CH, when: 16 },
 					];
 
-					leadSequence = [
+					polySequence = [
 					{ what: "C", when: 1 },
 					{ what: "D", when: 2 },
 					{ what: "E", when: 3 },
@@ -70,10 +68,12 @@
 					{ what: "D", when: 16 },
 					];
 
-					drumMachine.LoadSequence(sequence);
-					lead.LoadSequence(leadSequence);
+					console.log(engine.DrumMachine);
+					console.log(engine.Poly);
+					engine.DrumMachine.LoadSequence(sequence);
+					engine.Poly.LoadSequence(polySequence);
 
-					LoadSequence(context, drumMachine, lead, 120);
+					engine.LoadSequence(context, 120);
 				}
 				catch(e) {
 					document.write("<h2>Sorry, web audio is not supported by this browser</h2>");
@@ -108,243 +108,51 @@
 				</div>
 
 			</div>
-			<div id="lead">
-				<div id="lead-controls">
-					<span id="lead-saw-gain"><input type="text"></span>
-					<span id="lead-saw-detune"><input type="text"></span>
-					<span id="lead-square-gain"><input type="text"></span>
-					<span id="lead-square-detune"><input type="text"></span>
-					<span id="lead-filter-freq"><input type="text"></span>
-					<span id="lead-filter-q"><input type="text"></span>
+			<div id="poly">
+				<div id="poly-controls">
+					<span id="poly-saw-gain"><input type="text"></span>
+					<span id="poly-saw-detune"><input type="text"></span>
+					<span id="poly-square-gain"><input type="text"></span>
+					<span id="poly-square-detune"><input type="text"></span>
+					<span id="poly-filter-freq"><input type="text"></span>
+					<span id="poly-filter-q"><input type="text"></span>
 				</div>
-				<div id="lead-sequencer">
-					<div class="lead-sequencer-lane" id="lead-lane-b">
-						<span class="lead-sequencer-label">B&nbsp;</span>
-						<button class="note" id="lead-note-b1"></button>
-						<button class="note" id="lead-note-b2"></button>
-						<button class="note" id="lead-note-b3"></button>
-						<button class="note" id="lead-note-b4"></button>
-						<button class="note" id="lead-note-b5"></button>
-						<button class="note" id="lead-note-b6"></button>
-						<button class="note" id="lead-note-b7"></button>
-						<button class="note" id="lead-note-b8"></button>
-						<button class="note" id="lead-note-b9"></button>
-						<button class="note" id="lead-note-b10"></button>
-						<button class="note" id="lead-note-b11"></button>
-						<button class="note" id="lead-note-b12"></button>
-						<button class="note" id="lead-note-b13"></button>
-						<button class="note" id="lead-note-b14"></button>
-						<button class="note" id="lead-note-b15"></button>
-						<button class="note" id="lead-note-b16"></button>
+				<div id="poly-sequencer">
+					<div class="poly-sequencer-lane" id="poly-lane-b">
+						<span class="poly-sequencer-label">B&nbsp;</span>
 					</div>
-					<div class="lead-sequencer-lane" id="lead-lane-as">
-						<span class="lead-sequencer-label">A#</span>
-						<button class="note" id="lead-note-as1"></button>
-						<button class="note" id="lead-note-as2"></button>
-						<button class="note" id="lead-note-as3"></button>
-						<button class="note" id="lead-note-as4"></button>
-						<button class="note" id="lead-note-as5"></button>
-						<button class="note" id="lead-note-as6"></button>
-						<button class="note" id="lead-note-as7"></button>
-						<button class="note" id="lead-note-as8"></button>
-						<button class="note" id="lead-note-as9"></button>
-						<button class="note" id="lead-note-as10"></button>
-						<button class="note" id="lead-note-as11"></button>
-						<button class="note" id="lead-note-as12"></button>
-						<button class="note" id="lead-note-as13"></button>
-						<button class="note" id="lead-note-as14"></button>
-						<button class="note" id="lead-note-as15"></button>
-						<button class="note" id="lead-note-as16"></button>
+					<div class="poly-sequencer-lane" id="poly-lane-as">
+						<span class="poly-sequencer-label">A#</span>
 					</div>
-					<div class="lead-sequencer-lane" id="lead-lane-a">
-						<span class="lead-sequencer-label">A&nbsp;</span>
-						<button class="note" id="lead-note-a1"></button>
-						<button class="note" id="lead-note-a2"></button>
-						<button class="note" id="lead-note-a3"></button>
-						<button class="note" id="lead-note-a4"></button>
-						<button class="note" id="lead-note-a5"></button>
-						<button class="note" id="lead-note-a6"></button>
-						<button class="note" id="lead-note-a7"></button>
-						<button class="note" id="lead-note-a8"></button>
-						<button class="note" id="lead-note-a9"></button>
-						<button class="note" id="lead-note-a10"></button>
-						<button class="note" id="lead-note-a11"></button>
-						<button class="note" id="lead-note-a12"></button>
-						<button class="note" id="lead-note-a13"></button>
-						<button class="note" id="lead-note-a14"></button>
-						<button class="note" id="lead-note-a15"></button>
-						<button class="note" id="lead-note-a16"></button>
+					<div class="poly-sequencer-lane" id="poly-lane-a">
+						<span class="poly-sequencer-label">A&nbsp;</span>
 					</div>
-					<div class="lead-sequencer-lane" id="lead-lane-gs">
-						<span class="lead-sequencer-label">G#</span>
-						<button class="note" id="lead-note-gs1"></button>
-						<button class="note" id="lead-note-gs2"></button>
-						<button class="note" id="lead-note-gs3"></button>
-						<button class="note" id="lead-note-gs4"></button>
-						<button class="note" id="lead-note-gs5"></button>
-						<button class="note" id="lead-note-gs6"></button>
-						<button class="note" id="lead-note-gs7"></button>
-						<button class="note" id="lead-note-gs8"></button>
-						<button class="note" id="lead-note-gs9"></button>
-						<button class="note" id="lead-note-gs10"></button>
-						<button class="note" id="lead-note-gs11"></button>
-						<button class="note" id="lead-note-gs12"></button>
-						<button class="note" id="lead-note-gs13"></button>
-						<button class="note" id="lead-note-gs14"></button>
-						<button class="note" id="lead-note-gs15"></button>
-						<button class="note" id="lead-note-gs16"></button>
+					<div class="poly-sequencer-lane" id="poly-lane-gs">
+						<span class="poly-sequencer-label">G#</span>
 					</div>
-					<div class="lead-sequencer-lane" id="lead-lane-g">
-						<span class="lead-sequencer-label">G&nbsp;</span>
-						<button class="note" id="lead-note-g1"></button>
-						<button class="note" id="lead-note-g2"></button>
-						<button class="note" id="lead-note-g3"></button>
-						<button class="note" id="lead-note-g4"></button>
-						<button class="note" id="lead-note-g5"></button>
-						<button class="note" id="lead-note-g6"></button>
-						<button class="note" id="lead-note-g7"></button>
-						<button class="note" id="lead-note-g8"></button>
-						<button class="note" id="lead-note-g9"></button>
-						<button class="note" id="lead-note-g10"></button>
-						<button class="note" id="lead-note-g11"></button>
-						<button class="note" id="lead-note-g12"></button>
-						<button class="note" id="lead-note-g13"></button>
-						<button class="note" id="lead-note-g14"></button>
-						<button class="note" id="lead-note-g15"></button>
-						<button class="note" id="lead-note-g16"></button>
+					<div class="poly-sequencer-lane" id="poly-lane-g">
+						<span class="poly-sequencer-label">G&nbsp;</span>
 					</div>
-					<div class="lead-sequencer-lane" id="lead-lane-fs">
-						<span class="lead-sequencer-label">F#</span>
-						<button class="note" id="lead-note-fs1"></button>
-						<button class="note" id="lead-note-fs2"></button>
-						<button class="note" id="lead-note-fs3"></button>
-						<button class="note" id="lead-note-fs4"></button>
-						<button class="note" id="lead-note-fs5"></button>
-						<button class="note" id="lead-note-fs6"></button>
-						<button class="note" id="lead-note-fs7"></button>
-						<button class="note" id="lead-note-fs8"></button>
-						<button class="note" id="lead-note-fs9"></button>
-						<button class="note" id="lead-note-fs10"></button>
-						<button class="note" id="lead-note-fs11"></button>
-						<button class="note" id="lead-note-fs12"></button>
-						<button class="note" id="lead-note-fs13"></button>
-						<button class="note" id="lead-note-fs14"></button>
-						<button class="note" id="lead-note-fs15"></button>
-						<button class="note" id="lead-note-fs16"></button>
+					<div class="poly-sequencer-lane" id="poly-lane-fs">
+						<span class="poly-sequencer-label">F#</span>
 					</div>
-					<div class="lead-sequencer-lane" id="lead-lane-f">
-						<span class="lead-sequencer-label">F&nbsp;</span>
-						<button class="note" id="lead-note-f1"></button>
-						<button class="note" id="lead-note-f2"></button>
-						<button class="note" id="lead-note-f3"></button>
-						<button class="note" id="lead-note-f4"></button>
-						<button class="note" id="lead-note-f5"></button>
-						<button class="note" id="lead-note-f6"></button>
-						<button class="note" id="lead-note-f7"></button>
-						<button class="note" id="lead-note-f8"></button>
-						<button class="note" id="lead-note-f9"></button>
-						<button class="note" id="lead-note-f10"></button>
-						<button class="note" id="lead-note-f11"></button>
-						<button class="note" id="lead-note-f12"></button>
-						<button class="note" id="lead-note-f13"></button>
-						<button class="note" id="lead-note-f14"></button>
-						<button class="note" id="lead-note-f15"></button>
-						<button class="note" id="lead-note-f16"></button>
+					<div class="poly-sequencer-lane" id="poly-lane-f">
+						<span class="poly-sequencer-label">F&nbsp;</span>
 					</div>
-					<div class="lead-sequencer-lane" id="lead-lane-e">
-						<span class="lead-sequencer-label">E&nbsp;</span>
-						<button class="note" id="lead-note-e1"></button>
-						<button class="note" id="lead-note-e2"></button>
-						<button class="note" id="lead-note-e3"></button>
-						<button class="note" id="lead-note-e4"></button>
-						<button class="note" id="lead-note-e5"></button>
-						<button class="note" id="lead-note-e6"></button>
-						<button class="note" id="lead-note-e7"></button>
-						<button class="note" id="lead-note-e8"></button>
-						<button class="note" id="lead-note-e9"></button>
-						<button class="note" id="lead-note-e10"></button>
-						<button class="note" id="lead-note-e11"></button>
-						<button class="note" id="lead-note-e12"></button>
-						<button class="note" id="lead-note-e13"></button>
-						<button class="note" id="lead-note-e14"></button>
-						<button class="note" id="lead-note-e15"></button>
-						<button class="note" id="lead-note-e16"></button>
+					<div class="poly-sequencer-lane" id="poly-lane-e">
+						<span class="poly-sequencer-label">E&nbsp;</span>
 					</div>
-					<div class="lead-sequencer-lane" id="lead-lane-ds">
-						<span class="lead-sequencer-label">D#</span>
-						<button class="note" id="lead-note-ds1"></button>
-						<button class="note" id="lead-note-ds2"></button>
-						<button class="note" id="lead-note-ds3"></button>
-						<button class="note" id="lead-note-ds4"></button>
-						<button class="note" id="lead-note-ds5"></button>
-						<button class="note" id="lead-note-ds6"></button>
-						<button class="note" id="lead-note-ds7"></button>
-						<button class="note" id="lead-note-ds8"></button>
-						<button class="note" id="lead-note-ds9"></button>
-						<button class="note" id="lead-note-ds10"></button>
-						<button class="note" id="lead-note-ds11"></button>
-						<button class="note" id="lead-note-ds12"></button>
-						<button class="note" id="lead-note-ds13"></button>
-						<button class="note" id="lead-note-ds14"></button>
-						<button class="note" id="lead-note-ds15"></button>
-						<button class="note" id="lead-note-ds16"></button>
+					<div class="poly-sequencer-lane" id="poly-lane-ds">
+						<span class="poly-sequencer-label">D#</span>
 					</div>
-					<div class="lead-sequencer-lane" id="lead-lane-d">
-						<span class="lead-sequencer-label">D&nbsp;</span>
-						<button class="note" id="lead-note-d1"></button>
-						<button class="note" id="lead-note-d2"></button>
-						<button class="note" id="lead-note-d3"></button>
-						<button class="note" id="lead-note-d4"></button>
-						<button class="note" id="lead-note-d5"></button>
-						<button class="note" id="lead-note-d6"></button>
-						<button class="note" id="lead-note-d7"></button>
-						<button class="note" id="lead-note-d8"></button>
-						<button class="note" id="lead-note-d9"></button>
-						<button class="note" id="lead-note-d10"></button>
-						<button class="note" id="lead-note-d11"></button>
-						<button class="note" id="lead-note-d12"></button>
-						<button class="note" id="lead-note-d13"></button>
-						<button class="note" id="lead-note-d14"></button>
-						<button class="note" id="lead-note-d15"></button>
-						<button class="note" id="lead-note-d16"></button>
+					<div class="poly-sequencer-lane" id="poly-lane-d">
+						<span class="poly-sequencer-label">D&nbsp;</span>
 					</div>
-					<div class="lead-sequencer-lane" id="lead-lane-cs">
-						<span class="lead-sequencer-label">C#</span>
-						<button class="note" id="lead-note-cs1"></button>
-						<button class="note" id="lead-note-cs2"></button>
-						<button class="note" id="lead-note-cs3"></button>
-						<button class="note" id="lead-note-cs4"></button>
-						<button class="note" id="lead-note-cs5"></button>
-						<button class="note" id="lead-note-cs6"></button>
-						<button class="note" id="lead-note-cs7"></button>
-						<button class="note" id="lead-note-cs8"></button>
-						<button class="note" id="lead-note-cs9"></button>
-						<button class="note" id="lead-note-cs10"></button>
-						<button class="note" id="lead-note-cs11"></button>
-						<button class="note" id="lead-note-cs12"></button>
-						<button class="note" id="lead-note-cs13"></button>
-						<button class="note" id="lead-note-cs14"></button>
-						<button class="note" id="lead-note-cs15"></button>
-						<button class="note" id="lead-note-cs16"></button>
+					<div class="poly-sequencer-lane" id="poly-lane-cs">
+						<span class="poly-sequencer-label">C#</span>
 					</div>
-					<div class="lead-sequencer-lane" id="lead-lane-c">
-						<span class="lead-sequencer-label">C&nbsp;</span>
-						<button class="note" id="lead-note-c1"></button>
-						<button class="note" id="lead-note-c2"></button>
-						<button class="note" id="lead-note-c3"></button>
-						<button class="note" id="lead-note-c4"></button>
-						<button class="note" id="lead-note-c5"></button>
-						<button class="note" id="lead-note-c6"></button>
-						<button class="note" id="lead-note-c7"></button>
-						<button class="note" id="lead-note-c8"></button>
-						<button class="note" id="lead-note-c9"></button>
-						<button class="note" id="lead-note-c10"></button>
-						<button class="note" id="lead-note-c11"></button>
-						<button class="note" id="lead-note-c12"></button>
-						<button class="note" id="lead-note-c13"></button>
-						<button class="note" id="lead-note-c14"></button>
-						<button class="note" id="lead-note-c15"></button>
-						<button class="note" id="lead-note-c16"></button>
+					<div class="poly-sequencer-lane" id="poly-lane-c">
+						<span class="poly-sequencer-label">C&nbsp;</span>
 					</div>
 				</div>
 			</div>
