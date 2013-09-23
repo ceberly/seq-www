@@ -69,17 +69,17 @@ Engine = function(context) {
 			osc1.connect(bus.Input);
 			this.Trigger = function(at) {
 				osc1.start(at);
-				osc1.stop(at + .5);
+				osc1.stop(at + .2);
 			};
 		},
 		CH: function() {
 			var osc1 = context.createOscillator();
-			osc1.frequency.value = 1000;
+			osc1.frequency.value = 500;
 			osc1.type = "square";
 			osc1.connect(bus.Input);
 			this.Trigger = function(at) {
 				osc1.start(at);
-				osc1.stop(at + .5);
+				osc1.stop(at + .1);
 			};
 		},
 		OH: function() {
@@ -126,77 +126,80 @@ Engine = function(context) {
 		SquareGain: context.createGain(),
 		SawDetune: 0,
 		SquareDetune: 0,
-		Note: function(canonical, octave) {
-			this.osc = function(frequency) {
-				var osc1 = context.createOscillator();
-				osc1.type = "sawtooth";
-				osc1.frequency.value = frequency;
+	};
 
-				var osc2 = context.createOscillator();
-				osc2.type = "square";
-				osc2.frequency.value = frequency;
+	this.Poly.SawGain.connect(this.Poly.LP);
+	this.Poly.SquareGain.connect(this.Poly.LP);
+	this.Poly.LP.connect(bus.Input);
 
-				return [osc1, osc2];
+	var self = this;
+	this.Poly.Note = function(canonical, octave) {
+		var frequency = 0;
+		switch(canonical) {
+			case "A":
+				frequency = 220 * Math.pow(2, octave);
+				break;
+			case "A#":
+				frequency = 233.1 * Math.pow(2, octave);
+				break;
+			case "B":
+				frequency = 246.9 * Math.pow(2, octave);
+				break;
+			case "C":
+				frequency = 130.8 * Math.pow(2, octave);
+				break;
+			case "C#":
+				frequency = 138.6 * Math.pow(2, octave);
+				break;
+			case "D":
+				frequency = 146.8 * Math.pow(2, octave);
+				break;
+			case "D#":
+				frequency = 155.6 * Math.pow(2, octave);
+				break;
+			case "E":
+				frequency = 164.8 * Math.pow(2, octave);
+				break;
+			case "F":
+				frequency = 174.6 * Math.pow(2, octave);
+				break;
+			case "F#":
+				frequency = 185 * Math.pow(2, octave);
+				break;
+			case "G":
+				frequency = 195 * Math.pow(2, octave);
+				break;
+			case "G#":
+				frequency = 207.7 * Math.pow(2, octave);
+				break;
+		}
+
+		var osc1 = context.createOscillator();
+		osc1.type = "sawtooth";
+		osc1.frequency.value = frequency;
+		osc1.connect(self.Poly.SawGain);
+
+		var osc2 = context.createOscillator();
+		osc2.type = "square";
+		osc2.frequency.value = frequency;
+		osc2.connect(self.Poly.SquareGain);
+
+		var oscillators = [osc1, osc2];
+		this.Trigger = function(at) {
+			for (var i = 0; i < oscillators.length; i++) {
+				oscillators[i].start(at);
+				oscillators[i].stop(at + .1);
 			}
+		}
+	};
 
-			var frequency = 0;
-			switch(canonical) {
-				case "A":
-					frequency = 220 * Math.pow(2, octave);
-					break;
-				case "A#":
-					frequency = 233.1 * Math.pow(2, octave);
-					break;
-				case "B":
-					frequency = 246.9 * Math.pow(2, octave);
-					break;
-				case "C":
-					frequency = 130.8 * Math.pow(2, octave);
-					break;
-				case "C#":
-					frequency = 138.6 * Math.pow(2, octave);
-					break;
-				case "D":
-					frequency = 146.8 * Math.pow(2, octave);
-					break;
-				case "D#":
-					frequency = 155.6 * Math.pow(2, octave);
-					break;
-				case "E":
-					frequency = 164.8 * Math.pow(2, octave);
-					break;
-				case "F":
-					frequency = 174.6 * Math.pow(2, octave);
-					break;
-				case "F#":
-					frequency = 185 * Math.pow(2, octave);
-					break;
-				case "G":
-					frequency = 195 * Math.pow(2, octave);
-					break;
-				case "G#":
-					frequency = 207.7 * Math.pow(2, octave);
-					break;
-			}
+	this.Poly.LoadSequence = function(sequence) {
+		$(".poly-sequencer-lane > .note").data("on", 0);
 
-			this.frequency = frequency;
-
-			this.Trigger = function(at) {
-				var osc = new this.osc(frequency);
-				for (var i = 0; i < osc.length; i++) {
-					osc[i].start(at);
-					osc[i].stop(at + .1);
-				}
-			}
-		},
-		LoadSequence: function(sequence) {
-			self.Sequence = sequence;
-
-			for (var i = 0; i < sequence.length; i++) {
-				$("#poly-note-" + sequence[i].what.toString().replace(/#/, "s").toLowerCase() + sequence[i].when).data("note", sequence[i]);
-				$("#poly-note-" + sequence[i].what.toString().replace(/#/, "s").toLowerCase() + sequence[i].when).css("background-color", ColorRed);
-			}
-		},
+		for (var i = 0; i < sequence.length; i++) {
+			$($("#poly-lane-" + sequence[i].what.toString().replace(/#/, "s").toLowerCase() + " > .note")[sequence[i].when - 1]).data("on", sequence[i].when);
+			$($("#poly-lane-" + sequence[i].what.toString().replace(/#/, "s").toLowerCase() + " > .note")[sequence[i].when - 1]).css("background-color", ColorRed);
+		}
 	};
 
 	var self = this;
@@ -208,6 +211,17 @@ Engine = function(context) {
 		$('<button class="note"></button>').data("note", new self.DrumMachine.BD()).appendTo($("#drummachine-sequencer-bd"));
 
 		$('<button class="note"></button>').data("note", new self.Poly.Note("B", 0)).appendTo($("#poly-lane-b"));
+		$('<button class="note"></button>').data("note", new self.Poly.Note("A#", 0)).appendTo($("#poly-lane-as"));
+		$('<button class="note"></button>').data("note", new self.Poly.Note("A", 0)).appendTo($("#poly-lane-a"));
+		$('<button class="note"></button>').data("note", new self.Poly.Note("G#", 0)).appendTo($("#poly-lane-gs"));
+		$('<button class="note"></button>').data("note", new self.Poly.Note("G", 0)).appendTo($("#poly-lane-g"));
+		$('<button class="note"></button>').data("note", new self.Poly.Note("F#", 0)).appendTo($("#poly-lane-fs"));
+		$('<button class="note"></button>').data("note", new self.Poly.Note("F", 0)).appendTo($("#poly-lane-f"));
+		$('<button class="note"></button>').data("note", new self.Poly.Note("E", 0)).appendTo($("#poly-lane-e"));
+		$('<button class="note"></button>').data("note", new self.Poly.Note("D#", 0)).appendTo($("#poly-lane-ds"));
+		$('<button class="note"></button>').data("note", new self.Poly.Note("D", 0)).appendTo($("#poly-lane-d"));
+		$('<button class="note"></button>').data("note", new self.Poly.Note("C#", 0)).appendTo($("#poly-lane-cs"));
+		$('<button class="note"></button>').data("note", new self.Poly.Note("C", 0)).appendTo($("#poly-lane-c"));
 	}
 
 	this.LoadSequence = function(context, tempo) {
@@ -217,14 +231,13 @@ Engine = function(context) {
 		$("#sequencer-start").click(function() {
 			var now = context.currentTime;
 
-			notes = $(".note");
+			notes = $(".poly-sequencer-lane > .note");
 			for (var i = 0; i < notes.length; i++) {
 				var d = $(notes[i]).data("note");
 				var on = $(notes[i]).data("on");
 
 				if (d && (on > 0)) {
 					console.log(d);
-					console.log(on);
 					d.Trigger(now + ((on - 1) * tickTime));
 				}
 			}
