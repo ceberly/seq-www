@@ -50,53 +50,66 @@ Engine = function(context) {
 	this.Bus.Peaking.connect(this.Bus.HighShelf);
 	this.Bus.LowShelf.connect(this.Bus.Peaking);
 
+	var bus = this.Bus;
+
 	this.DrumMachine = {
 		BD: function() {
-			var osc1 = context.createOscillator().frequency.value = 62;
+			var osc1 = context.createOscillator();
+			osc1.frequency.value = 62;
+			osc1.connect(bus.Input);
 			this.Trigger = function(at) {
 				osc1.start(at);
 				osc1.stop(at + .5);
 			};
 		},
 		SD: function() {
-			var osc1 = context.createOscillator().frequency.value = 62;
+			var osc1 = context.createOscillator();
+			osc1.type = "square";
+			osc1.frequency.value = 300;
+			osc1.connect(bus.Input);
 			this.Trigger = function(at) {
 				osc1.start(at);
 				osc1.stop(at + .5);
 			};
 		},
 		CH: function() {
-			var osc1 = context.createOscillator().frequency.value = 62;
+			var osc1 = context.createOscillator();
+			osc1.frequency.value = 1000;
+			osc1.type = "square";
+			osc1.connect(bus.Input);
 			this.Trigger = function(at) {
 				osc1.start(at);
 				osc1.stop(at + .5);
 			};
 		},
 		OH: function() {
-			var osc1 = context.createOscillator().frequency.value = 62;
+			var osc1 = context.createOscillator();
+			osc1.frequency.value = 1000;
+			osc1.type = "square";
+			osc1.connect(bus.Input);
 			this.Trigger = function(at) {
 				osc1.start(at);
 				osc1.stop(at + .5);
 			};
 		},
 		LoadSequence: function(sequence) {
-			$(".drummachine-lane > .note").data("on", false);
+			$(".drummachine-lane > .note").data("on", 0);
 			for (var i = 0; i < sequence.length; i++) {
 				switch (sequence[i].what) {
 					case DrumSound.BD:
-						$($("#drummachine-sequencer-bd > .note")[sequence[i].when - 1]).data("on", true);
+						$($("#drummachine-sequencer-bd > .note")[sequence[i].when - 1]).data("on", sequence[i].when);
 						$($("#drummachine-sequencer-bd > .note")[sequence[i].when - 1]).css("background-color", "red");
 						break;
 					case DrumSound.SD:
-						$($("#drummachine-sequencer-sd > .note")[sequence[i].when - 1]).data("on", true);
+						$($("#drummachine-sequencer-sd > .note")[sequence[i].when - 1]).data("on", sequence[i].when);
 						$($("#drummachine-sequencer-sd > .note")[sequence[i].when - 1]).css("background-color", "red");
 						break;
 					case DrumSound.CH:
-						$($("#drummachine-sequencer-ch > .note")[sequence[i].when - 1]).data("on", true);
+						$($("#drummachine-sequencer-ch > .note")[sequence[i].when - 1]).data("on", sequence[i].when);
 						$($("#drummachine-sequencer-ch > .note")[sequence[i].when - 1]).css("background-color", "red");
 						break;
 					case DrumSound.OH:
-						$($("#drummachine-sequencer-oh > .note")[sequence[i].when - 1]).data("on", true);
+						$($("#drummachine-sequencer-oh > .note")[sequence[i].when - 1]).data("on", sequence[i].when);
 						$($("#drummachine-sequencer-oh > .note")[sequence[i].when - 1]).css("background-color", "red");
 						break;
 					default:
@@ -175,10 +188,6 @@ Engine = function(context) {
 					osc[i].stop(at + .1);
 				}
 			}
-
-			this.toString = function() {
-				return canonical;
-			}
 		},
 		LoadSequence: function(sequence) {
 			self.Sequence = sequence;
@@ -190,25 +199,15 @@ Engine = function(context) {
 		},
 	};
 
+	var self = this;
 
 	for (var i = 0; i < 16; i++) {
-		$("#drummachine-sequencer-oh").append('<button class="note"></button>').data("note", new this.DrumMachine.OH());
-		$("#drummachine-sequencer-ch").append('<button class="note"></button>').data("note", new this.DrumMachine.CH());
-		$("#drummachine-sequencer-sd").append('<button class="note"></button>').data("note", new this.DrumMachine.SD());
-		$("#drummachine-sequencer-bd").append('<button class="note"></button>').data("note", new this.DrumMachine.BD());
+		$('<button class="note"></button>').data("note", new self.DrumMachine.OH()).appendTo($("#drummachine-sequencer-oh"));
+		$('<button class="note"></button>').data("note", new self.DrumMachine.CH()).appendTo($("#drummachine-sequencer-ch"));
+		$('<button class="note"></button>').data("note", new self.DrumMachine.SD()).appendTo($("#drummachine-sequencer-sd"));
+		$('<button class="note"></button>').data("note", new self.DrumMachine.BD()).appendTo($("#drummachine-sequencer-bd"));
 
-		$("#poly-lane-b").append('<button class="note"></button>');
-		$("#poly-lane-as").append('<button class="note"></button>');
-		$("#poly-lane-a").append('<button class="note"></button>');
-		$("#poly-lane-gs").append('<button class="note"></button>');
-		$("#poly-lane-g").append('<button class="note"></button>');
-		$("#poly-lane-fs").append('<button class="note"></button>');
-		$("#poly-lane-f").append('<button class="note"></button>');
-		$("#poly-lane-e").append('<button class="note"></button>');
-		$("#poly-lane-ds").append('<button class="note"></button>');
-		$("#poly-lane-d").append('<button class="note"></button>');
-		$("#poly-lane-cs").append('<button class="note"></button>');
-		$("#poly-lane-c").append('<button class="note"></button>');
+		$('<button class="note"></button>').data("note", new self.Poly.Note("B", 0)).appendTo($("#poly-lane-b"));
 	}
 
 	this.LoadSequence = function(context, tempo) {
@@ -223,16 +222,16 @@ Engine = function(context) {
 				var d = $(notes[i]).data("note");
 				var on = $(notes[i]).data("on");
 
-				console.log(d);
-				console.log(on);
-				if (d && on) {
-					d.what.Trigger(now + (d.when * tickTime));
+				if (d && (on > 0)) {
+					console.log(d);
+					console.log(on);
+					d.Trigger(now + ((on - 1) * tickTime));
 				}
 			}
 
-			t = setTimeout(function() {
-				$("#sequencer-start").click();	
-			}, tickTime * 16 * 1000);
+//			t = setTimeout(function() {
+//				$("#sequencer-start").click();	
+//			}, tickTime * 16 * 1000);
 		});
 
 		$("#sequencer-stop").click(function() {
