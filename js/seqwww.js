@@ -174,22 +174,36 @@ Engine = function(context) {
 				break;
 		}
 
+		var osc1Gate = context.createGain();
+		osc1Gate.connect(self.Poly.SawGain);
+		osc1Gate.gain.value = 0;
+
+		var osc2Gate = context.createGain();
+		osc2Gate.connect(self.Poly.SquareGain);
+		osc2Gate.gain.value = 0;
+
 		var osc1 = context.createOscillator();
 		osc1.type = "sawtooth";
 		osc1.frequency.value = frequency;
-		osc1.connect(self.Poly.SawGain);
+		osc1.connect(osc1Gate);
 
 		var osc2 = context.createOscillator();
 		osc2.type = "square";
 		osc2.frequency.value = frequency;
-		osc2.connect(self.Poly.SquareGain);
+		osc2.connect(osc2Gate);
+
+		osc1.start(0);
+		osc2.start(0);
 
 		var oscillators = [osc1, osc2];
 		this.Trigger = function(at) {
-			for (var i = 0; i < oscillators.length; i++) {
-				oscillators[i].start(at);
-				oscillators[i].stop(at + .1);
-			}
+			// attack
+			osc1Gate.gain.linearRampToValueAtTime(1, at);
+			osc2Gate.gain.linearRampToValueAtTime(1, at);
+
+			// release
+			osc1Gate.gain.linearRampToValueAtTime(0, at + .1);
+			osc2Gate.gain.linearRampToValueAtTime(0, at + .1);
 		}
 	};
 
@@ -230,14 +244,12 @@ Engine = function(context) {
 		var t = false;
 		$("#sequencer-start").click(function() {
 			var now = context.currentTime;
-
-			notes = $(".poly-sequencer-lane > .note");
+			var notes = $(".poly-sequencer-lane > .note");
 			for (var i = 0; i < notes.length; i++) {
 				var d = $(notes[i]).data("note");
 				var on = $(notes[i]).data("on");
 
 				if (d && (on > 0)) {
-					console.log(d);
 					d.Trigger(now + ((on - 1) * tickTime));
 				}
 			}
@@ -382,5 +394,14 @@ Engine = function(context) {
 //			"max": lead.LP.Q.maxValue,
 //			"value": lead.LP.Q.value,
 //		});
+//		
+		$(".note").click(function() { 
+			var d = $(this).data();
+			if (d.on > 0) {
+				d.on = 0;
+			} else {
+				d.on = 3; 
+			}
+		});
 	}
 }
