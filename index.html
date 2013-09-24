@@ -22,7 +22,7 @@
 
 					engine = new Engine(context);
 
-					engine.SetupUI(engine.Bus, engine.DrumMachine, engine.Poly);
+					engine.SetupUI();
 
 					sequence = [
 					{ what: DrumSound.BD, when: 1 },
@@ -50,22 +50,18 @@
 					];
 
 					polySequence = [
+					{ what: "D#", when: 1 },
 					{ what: "C", when: 1 },
-					{ what: "D", when: 2 },
-					{ what: "E", when: 3 },
-					{ what: "F", when: 4 },
+					{ what: "G#", when: 1 },
+					{ what: "D#", when: 5 },
+					{ what: "C", when: 5 },
 					{ what: "G", when: 5 },
-					{ what: "A", when: 6 },
-					{ what: "B", when: 7 },
-					{ what: "C", when: 8 },
-					{ what: "D", when: 9 },
-					{ what: "E", when: 10 },
-					{ what: "F", when: 11 },
-					{ what: "G", when: 12 },
-					{ what: "A", when: 13 },
-					{ what: "B", when: 14 },
-					{ what: "C", when: 15 },
-					{ what: "D", when: 16 },
+					{ what: "D#", when: 9 },
+					{ what: "A#", when: 9 },
+					{ what: "G", when: 9 },
+					{ what: "D#", when: 13 },
+					{ what: "A#", when: 13 },
+					{ what: "F", when: 13 },
 					];
 
 					engine.DrumMachine.LoadSequence(sequence);
@@ -113,12 +109,25 @@
 					<div class="hcontrol"><label><input id="poly-env-sustain" type="text">sustain</label></div>
 					<div class="hcontrol"><label><input id="poly-env-release" type="text">release</label></div>
 
-					<div class="hcontrol"><label><input id="poly-osc2-gain" type="text">osc2 amount</label></div>
-
 					<div class="hcontrol"><label><input id="poly-filter-freq" type="text">cutoff</label></div>
 					<div class="hcontrol"><label><input id="poly-filter-q" type="text">resonance</label></div>
 				</div>
 				<div id="poly-sequencer">
+					<div class="poly-sequencer-lane" id="poly-lane-e2">
+						<span class="poly-sequencer-label">E&nbsp;</span>
+					</div>
+					<div class="poly-sequencer-lane" id="poly-lane-ds">
+						<span class="poly-sequencer-label">D#</span>
+					</div>
+					<div class="poly-sequencer-lane" id="poly-lane-d">
+						<span class="poly-sequencer-label">D&nbsp;</span>
+					</div>
+					<div class="poly-sequencer-lane" id="poly-lane-cs">
+						<span class="poly-sequencer-label">C#</span>
+					</div>
+					<div class="poly-sequencer-lane" id="poly-lane-c">
+						<span class="poly-sequencer-label">C&nbsp;</span>
+					</div>
 					<div class="poly-sequencer-lane" id="poly-lane-b">
 						<span class="poly-sequencer-label">B&nbsp;</span>
 					</div>
@@ -142,18 +151,6 @@
 					</div>
 					<div class="poly-sequencer-lane" id="poly-lane-e">
 						<span class="poly-sequencer-label">E&nbsp;</span>
-					</div>
-					<div class="poly-sequencer-lane" id="poly-lane-ds">
-						<span class="poly-sequencer-label">D#</span>
-					</div>
-					<div class="poly-sequencer-lane" id="poly-lane-d">
-						<span class="poly-sequencer-label">D&nbsp;</span>
-					</div>
-					<div class="poly-sequencer-lane" id="poly-lane-cs">
-						<span class="poly-sequencer-label">C#</span>
-					</div>
-					<div class="poly-sequencer-lane" id="poly-lane-c">
-						<span class="poly-sequencer-label">C&nbsp;</span>
 					</div>
 				</div>
 			</div>

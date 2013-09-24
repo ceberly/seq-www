@@ -4,11 +4,6 @@ ColorBase1 = "rgb(147, 161, 161)";
 ColorWhite = "rgb(255, 255, 255)";
 ColorBase2 = "rgb(238, 232, 213)";
 
-PatchType = {
-	Drum: 0,
-	Chord: 1
-};
-
 DrumSound = {
 	BD: "BD",
 	SD: "SD",
@@ -21,11 +16,7 @@ Engine = function(context) {
 
 	this.Bus = {
 		Gain: context.createGain(),
-		// reverb isn't working right now.
-		//var reverb: outputContext.createConvolver(),
-		//reverb.connect(gain),
-		Delay: context.createDelay(),
-		Dist: context.createWaveShaper(),
+		//Delay: context.createDelay(),
 		Comp: context.createDynamicsCompressor(),
 		HighShelf: context.createBiquadFilter(),
 		Peaking: context.createBiquadFilter(),
@@ -43,11 +34,8 @@ Engine = function(context) {
 	this.Bus.LowShelf.type = "lowshelf";
 	this.Bus.LowShelf.frequency.value = 100;
 
-	this.Bus.Dist.amount = 0;
 	this.Bus.Gain.connect(context.destination);
-	this.Bus.Delay.connect(this.Bus.Gain);
-	this.Bus.Dist.connect(this.Bus.Delay);
-	this.Bus.Comp.connect(this.Bus.Dist);
+	this.Bus.Comp.connect(this.Bus.Gain);
 	this.Bus.HighShelf.connect(this.Bus.Comp);
 	this.Bus.Peaking.connect(this.Bus.HighShelf);
 	this.Bus.LowShelf.connect(this.Bus.Peaking);
@@ -124,22 +112,24 @@ Engine = function(context) {
 
 	this.Poly = {
 		LP: context.createBiquadFilter(),
-		SawDetuneGain: context.createGain(),
-		SineGain: context.createGain(),
+		MasterGain: context.createGain(),
+		Osc1Gain: context.createGain(),
+		Osc2Gain: context.createGain(),
 		Octave: 0,
-		SawDetune: 0, // cents
-		SquareDetune: 0, // cents
-		Attack: .034, // seconds
+		Attack: .1, // seconds
 		Decay: .1, // seconds
 		Sustain: .76, // gain multiplier
-		Release: .048, // seconds
+		Release: .5, // seconds
 	};
 
-	this.Poly.SawDetuneGain.connect(this.Poly.LP);
-	this.Poly.SineGain.connect(bus.Input);
-	this.Poly.LP.connect(bus.Input);
-	this.Poly.LP.frequency.value = 3500;
+	this.Poly.MasterGain.connect(bus.Input);
+
+	this.Poly.LP.connect(this.Poly.MasterGain);
+	this.Poly.LP.frequency.value = 2500;
 	this.Poly.LP.Q.value = 0;
+
+	this.Poly.Osc1Gain.connect(this.Poly.LP);
+	this.Poly.Osc2Gain.connect(this.Poly.LP);
 
 	var poly = this.Poly;
 	this.Poly.Note = function(canonical, octave) {
@@ -184,16 +174,12 @@ Engine = function(context) {
 		}
 
 		var osc1Gate = context.createGain();
-		osc1Gate.connect(self.Poly.LP);
+		osc1Gate.connect(self.Poly.Osc1Gain);
 		osc1Gate.gain.value = 0;
 
 		var osc2Gate = context.createGain();
-		osc2Gate.connect(self.Poly.SawDetuneGain);
+		osc2Gate.connect(self.Poly.Osc2Gain);
 		osc2Gate.gain.value = 0;
-
-		var osc3Gate = context.createGain();
-		osc3Gate.connect(self.Poly.SineGain);
-		osc3Gate.gain.value = 0;
 
 		this.osc1 = context.createOscillator();
 		this.osc1.type = "sawtooth";
@@ -201,33 +187,23 @@ Engine = function(context) {
 		this.osc1.connect(osc1Gate);
 
 		this.osc2 = context.createOscillator();
-		this.osc2.type = "sawtooth";
-		this.osc2.detune.value = 8;
+		this.osc2.type = "square";
 		this.osc2.frequency.value = frequency * Math.pow(2, octave);
 		this.osc2.connect(osc2Gate);
 
-		this.osc3 = context.createOscillator();
-		this.osc3.type = "sine";
-		this.osc3.frequency.value = frequency * Math.pow(2, octave);
-		this.osc3.connect(osc3Gate);
-
 		this.osc1.start(0);
 		this.osc2.start(0);
-		this.osc3.start(0);
 
 		var oscillators = [this.osc1, this.osc2];
 		this.Trigger = function(at) {
 			osc1Gate.gain.setTargetAtTime(1, at, self.Poly.Attack);
 			osc2Gate.gain.setTargetAtTime(1, at, self.Poly.Attack);
-			osc3Gate.gain.setTargetAtTime(1, at, self.Poly.Attack);
 
 			osc1Gate.gain.setTargetAtTime(1 * self.Poly.Sustain, at + self.Poly.Attack, self.Poly.Decay);
 			osc2Gate.gain.setTargetAtTime(1 * self.Poly.Sustain, at + self.Poly.Attack, self.Poly.Decay);
-			osc3Gate.gain.setTargetAtTime(1 * self.Poly.Sustain, at + self.Poly.Attack, self.Poly.Decay);
 
 			osc1Gate.gain.setTargetAtTime(0, at + self.Poly.Attack + self.Poly.Decay, self.Poly.Release);
 			osc2Gate.gain.setTargetAtTime(0, at + self.Poly.Attack + self.Poly.Decay, self.Poly.Release);
-			osc3Gate.gain.setTargetAtTime(0, at + self.Poly.Attack + self.Poly.Decay, self.Poly.Release);
 		}
 	};
 
@@ -254,6 +230,7 @@ Engine = function(context) {
 		$('<button class="note"></button>').data("note", new self.Poly.Note("F#", 0)).appendTo($("#poly-lane-fs"));
 		$('<button class="note"></button>').data("note", new self.Poly.Note("F", 0)).appendTo($("#poly-lane-f"));
 		$('<button class="note"></button>').data("note", new self.Poly.Note("E", 0)).appendTo($("#poly-lane-e"));
+		$('<button class="note"></button>').data("note", new self.Poly.Note("E", 1)).appendTo($("#poly-lane-e2"));
 		$('<button class="note"></button>').data("note", new self.Poly.Note("D#", 0)).appendTo($("#poly-lane-ds"));
 		$('<button class="note"></button>').data("note", new self.Poly.Note("D", 0)).appendTo($("#poly-lane-d"));
 		$('<button class="note"></button>').data("note", new self.Poly.Note("C#", 0)).appendTo($("#poly-lane-cs"));
@@ -261,8 +238,8 @@ Engine = function(context) {
 	}
 
 	this.LoadSequence = function(tempo) {
-		// assume 16th notes for the time being.
-		var tickTime = 60 / tempo / 4;
+		// assume 8th notes for the time being.
+		var tickTime = 60 / tempo / 2;
 		var t = false;
 		$("#sequencer-start").click(function() {
 			var now = context.currentTime;
@@ -356,16 +333,6 @@ Engine = function(context) {
 			"change": function(v) { this.Bus.Comp.release.value = v; }
 		});
 
-		$("#master-dist-amount > input").knob({
-			"width": master_knob_width,
-			"min": 0,
-			"max": 100,
-			"value": this.Bus.Dist.amount,
-			"change": function(v) { this.Bus.Dist.amount = v; }
-		});
-
-
-
 		// drummmachine controls
 		$("#drummachine-controls-bd-decay > input").knob({
 			"width": drum_control_knob_width,
@@ -412,15 +379,6 @@ Engine = function(context) {
 			"change": function(v) { self.Poly.Release = v / 1000; }
 		});
 
-		$("#poly-osc2-gain").val(self.Poly.SawDetuneGain.gain.value * 100).knob({
-			"width": poly_control_knob_width,
-			"height": poly_control_knob_height,
-			"min": 0,
-			"max": 100,
-			"step": 1, 
-			"change": function(v) { self.Poly.SawDetuneGain.gain.value = v / 100; }
-		});
-
 		$("#poly-filter-freq").val(self.Poly.LP.frequency.value).knob({
 			"width": poly_control_knob_width,
 			"height": poly_control_knob_height,
@@ -428,6 +386,15 @@ Engine = function(context) {
 			"max": 10000,
 			"step": 10, 
 			"change": function(v) { self.Poly.LP.frequency.value = v; }
+		});
+
+		$("#poly-filter-q").val(self.Poly.LP.Q.value).knob({
+			"width": poly_control_knob_width,
+			"height": poly_control_knob_height,
+			"min": 0,
+			"max": 500,
+			"step": 1, 
+			"change": function(v) { self.Poly.LP.frequency.value = v / 100; }
 		});
 
 		$(".note").click(function() { 
