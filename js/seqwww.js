@@ -43,44 +43,17 @@ Engine = function(context) {
 	var bus = this.Bus;
 
 	this.DrumMachine = {
-		BD: function() {
-			var osc1 = context.createOscillator();
-			osc1.frequency.value = 62;
-			osc1.connect(bus.Input);
-			this.Trigger = function(at) {
-				osc1.start(at);
-				osc1.stop(at + .5);
-			};
+		MasterGain: context.createGain(),
+		BD: {
+			Decay: 0
 		},
-		SD: function() {
-			var osc1 = context.createOscillator();
-			osc1.type = "square";
-			osc1.frequency.value = 300;
-			osc1.connect(bus.Input);
-			this.Trigger = function(at) {
-				osc1.start(at);
-				osc1.stop(at + .2);
-			};
+		SD: {
+			Decay: 0
 		},
-		CH: function() {
-			var osc1 = context.createOscillator();
-			osc1.frequency.value = 500;
-			osc1.type = "square";
-			osc1.connect(bus.Input);
-			this.Trigger = function(at) {
-				osc1.start(at);
-				osc1.stop(at + .1);
-			};
+		CH: {
+
 		},
-		OH: function() {
-			var osc1 = context.createOscillator();
-			osc1.frequency.value = 1000;
-			osc1.type = "square";
-			osc1.connect(bus.Input);
-			this.Trigger = function(at) {
-				osc1.start(at);
-				osc1.stop(at + .5);
-			};
+		OH: {
 		},
 		LoadSequence: function(sequence) {
 			$(".drummachine-lane > .note").data("on", 0);
@@ -109,6 +82,129 @@ Engine = function(context) {
 		},
 	};
 
+	this.DrumMachine.MasterGain.connect(bus.Input);
+
+	//BD
+	var bdGate = context.createGain();
+	bdGate.gain.value = 0;
+	bdGate.connect(this.DrumMachine.MasterGain);
+
+	var bdOsc1 = context.createOscillator();
+	bdOsc1.frequency.value = 100;
+	bdOsc1.connect(bdGate);
+	bdOsc1.start(0);
+
+	this.DrumMachine.BD.Trigger = function(at) {
+			bdGate.gain.setTargetAtTime(1, at, .01);
+			bdGate.gain.setTargetAtTime(0, at + .1, 1);
+	};
+
+	//SD
+	var sdGate = context.createGain();
+	sdGate.gain.value = 0;
+	sdGate.connect(this.DrumMachine.MasterGain);
+
+	var sdOsc1 = context.createOscillator();
+	sdOsc1.frequency.value = 476;
+	sdOsc1.connect(sdGate);
+	sdOsc1.start(0);
+
+	var sdOsc2 = context.createOscillator();
+	sdOsc2.frequency.value = 238;
+	sdOsc2.connect(sdGate);
+	sdOsc2.start(0);
+
+	this.DrumMachine.SD.Trigger = function(at) {
+			sdGate.gain.setTargetAtTime(1, at, 0);
+			sdGate.gain.setTargetAtTime(0, at + .06, 0);
+	};
+
+	//CH
+	var chHP = context.createBiquadFilter();
+	chHP.connect(this.DrumMachine.MasterGain);
+	chHP.type = "highpass";
+	chHP.frequency.value = 10000;
+
+	// high bandpass
+	var chHGain1 = context.createGain();
+	chHGain1.connect(chHP);
+	chHGain1.gain.value = 0;
+
+	var chHGain2 = context.createGain();
+	chHGain2.connect(chHP);
+	chHGain2.gain.value = 0;
+
+	var chHBPSplit = context.createChannelSplitter(2);
+	chHBPSplit.connect(chHGain1);
+	chHBPSplit.connect(chHGain2);
+
+	var chHBP = context.createBiquadFilter();
+	chHBP.type = "bandpass";
+	chHBP.frequency.value = 7000;
+	chHBP.Q.value = 12;
+	chHBP.connect(chHBPSplit);
+
+	// low bandpass
+	var chLBGain = context.createGain();
+	chLBGain.connect(chHP);
+	chLBGain.gain.value = 0;
+
+	var chLBP = context.createBiquadFilter();
+	chLBP.type = "bandpass";
+	chLBP.frequency.value = 3500;
+	chLBP.Q.value = 12;
+	chLBP.connect(chLBGain);
+
+	var chSplit = context.createChannelSplitter(2);
+	chSplit.connect(chLBP);
+	chSplit.connect(chHBP);
+
+	var chOsc1 = context.createOscillator();
+	chOsc1.type = "square";
+	chOsc1.frequency.value = 303;
+	chOsc1.connect(chSplit);
+	chOsc1.start(0);
+
+	var chOsc2 = context.createOscillator();
+	chOsc2.type = "square";
+	chOsc2.frequency.value = 176;
+	chOsc2.connect(chSplit);
+	chOsc2.start(0);
+
+	var chOsc3 = context.createOscillator();
+	chOsc3.type = "square";
+	chOsc3.frequency.value = 214;
+	chOsc3.connect(chSplit);
+	chOsc3.start(0);
+
+	var chOsc4 = context.createOscillator();
+	chOsc4.type = "square";
+	chOsc4.frequency.value = 119;
+	chOsc4.connect(chSplit);
+	chOsc4.start(0);
+
+	var chOsc5 = context.createOscillator();
+	chOsc5.type = "square";
+	chOsc5.frequency.value = 540;
+	chOsc5.connect(chSplit);
+	chOsc5.start(0);
+
+	var chOsc6 = context.createOscillator();
+	chOsc6.type = "square";
+	chOsc6.frequency.value = 800;
+	chOsc6.connect(chSplit);
+	chOsc6.start(0);
+
+	this.DrumMachine.CH.Trigger = function(at) {
+		chHGain1.gain.setTargetAtTime(1, at, 0);
+		chHGain1.gain.setTargetAtTime(0, at + .01, .01);
+
+		chHGain2.gain.setTargetAtTime(1, at, 0);
+		chHGain2.gain.setTargetAtTime(0, at + .02, .01);
+
+		chLBGain.gain.setTargetAtTime(1, at, 0);
+		chLBGain.gain.setTargetAtTime(0, at + .02, .01);
+	};
 
 	this.Poly = {
 		LP: context.createBiquadFilter(),
@@ -217,10 +313,10 @@ Engine = function(context) {
 	};
 
 	for (var i = 0; i < 16; i++) {
-		$('<button class="note"></button>').data("note", new self.DrumMachine.OH()).appendTo($("#drummachine-sequencer-oh"));
-		$('<button class="note"></button>').data("note", new self.DrumMachine.CH()).appendTo($("#drummachine-sequencer-ch"));
-		$('<button class="note"></button>').data("note", new self.DrumMachine.SD()).appendTo($("#drummachine-sequencer-sd"));
-		$('<button class="note"></button>').data("note", new self.DrumMachine.BD()).appendTo($("#drummachine-sequencer-bd"));
+		$('<button class="note"></button>').data("note", self.DrumMachine.CH).appendTo($("#drummachine-sequencer-oh"));
+		$('<button class="note"></button>').data("note", self.DrumMachine.CH).appendTo($("#drummachine-sequencer-ch"));
+		$('<button class="note"></button>').data("note", self.DrumMachine.SD).appendTo($("#drummachine-sequencer-sd"));
+		$('<button class="note"></button>').data("note", self.DrumMachine.BD).appendTo($("#drummachine-sequencer-bd"));
 
 		$('<button class="note"></button>').data("note", new self.Poly.Note("B", 0)).appendTo($("#poly-lane-b"));
 		$('<button class="note"></button>').data("note", new self.Poly.Note("A#", 0)).appendTo($("#poly-lane-as"));
@@ -243,7 +339,7 @@ Engine = function(context) {
 		var t = false;
 		$("#sequencer-start").click(function() {
 			var now = context.currentTime;
-			var notes = $(".poly-sequencer-lane > .note");
+			var notes = $(".drummachine-lane > .note");
 			for (var i = 0; i < notes.length; i++) {
 				var d = $(notes[i]).data("note");
 				var on = $(notes[i]).data("on");
