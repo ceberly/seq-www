@@ -68,12 +68,10 @@
 					{ what: "D", when: 16 },
 					];
 
-					console.log(engine.DrumMachine);
-					console.log(engine.Poly);
 					engine.DrumMachine.LoadSequence(sequence);
 					engine.Poly.LoadSequence(polySequence);
 
-					engine.LoadSequence(context, 120);
+					engine.LoadSequence(120);
 				}
 				catch(e) {
 					document.write("<h2>Sorry, web audio is not supported by this browser</h2>");
@@ -110,12 +108,15 @@
 			</div>
 			<div id="poly">
 				<div id="poly-controls">
-					<span id="poly-saw-gain"><input type="text"></span>
-					<span id="poly-saw-detune"><input type="text"></span>
-					<span id="poly-square-gain"><input type="text"></span>
-					<span id="poly-square-detune"><input type="text"></span>
-					<span id="poly-filter-freq"><input type="text"></span>
-					<span id="poly-filter-q"><input type="text"></span>
+					<div class="hcontrol"><label><input id="poly-env-attack" type="text">attack</label></div>
+					<div class="hcontrol"><label><input id="poly-env-decay" type="text">decay</label></div>
+					<div class="hcontrol"><label><input id="poly-env-sustain" type="text">sustain</label></div>
+					<div class="hcontrol"><label><input id="poly-env-release" type="text">release</label></div>
+
+					<div class="hcontrol"><label><input id="poly-osc2-gain" type="text">osc2 amount</label></div>
+
+					<div class="hcontrol"><label><input id="poly-filter-freq" type="text">cutoff</label></div>
+					<div class="hcontrol"><label><input id="poly-filter-q" type="text">resonance</label></div>
 				</div>
 				<div id="poly-sequencer">
 					<div class="poly-sequencer-lane" id="poly-lane-b">

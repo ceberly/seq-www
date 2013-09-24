@@ -67,3 +67,12 @@ body {
 	width: 90%;
 	height: 8%;
 }
+
+.hcontrol {
+	font-size: .50em;
+	display: inline-block;
+}
+
+.hcontrol > label {
+	position: relative;
+}

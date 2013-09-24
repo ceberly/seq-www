@@ -17,6 +17,8 @@ DrumSound = {
 };
 
 Engine = function(context) {
+	var self = this;
+
 	this.Bus = {
 		Gain: context.createGain(),
 		// reverb isn't working right now.
@@ -122,88 +124,110 @@ Engine = function(context) {
 
 	this.Poly = {
 		LP: context.createBiquadFilter(),
-		SawGain: context.createGain(),
-		SquareGain: context.createGain(),
-		SawDetune: 0,
-		SquareDetune: 0,
+		SawDetuneGain: context.createGain(),
+		SineGain: context.createGain(),
+		Octave: 0,
+		SawDetune: 0, // cents
+		SquareDetune: 0, // cents
+		Attack: .034, // seconds
+		Decay: .1, // seconds
+		Sustain: .76, // gain multiplier
+		Release: .048, // seconds
 	};
 
-	this.Poly.SawGain.connect(this.Poly.LP);
-	this.Poly.SquareGain.connect(this.Poly.LP);
+	this.Poly.SawDetuneGain.connect(this.Poly.LP);
+	this.Poly.SineGain.connect(bus.Input);
 	this.Poly.LP.connect(bus.Input);
+	this.Poly.LP.frequency.value = 3500;
+	this.Poly.LP.Q.value = 0;
 
-	var self = this;
+	var poly = this.Poly;
 	this.Poly.Note = function(canonical, octave) {
 		var frequency = 0;
 		switch(canonical) {
 			case "A":
-				frequency = 220 * Math.pow(2, octave);
+				frequency = 220;
 				break;
 			case "A#":
-				frequency = 233.1 * Math.pow(2, octave);
+				frequency = 233.1;
 				break;
 			case "B":
-				frequency = 246.9 * Math.pow(2, octave);
+				frequency = 246.9;
 				break;
 			case "C":
-				frequency = 130.8 * Math.pow(2, octave);
+				frequency = 130.8;
 				break;
 			case "C#":
-				frequency = 138.6 * Math.pow(2, octave);
+				frequency = 138.6;
 				break;
 			case "D":
-				frequency = 146.8 * Math.pow(2, octave);
+				frequency = 146.8;
 				break;
 			case "D#":
-				frequency = 155.6 * Math.pow(2, octave);
+				frequency = 155.6;
 				break;
 			case "E":
-				frequency = 164.8 * Math.pow(2, octave);
+				frequency = 164.8;
 				break;
 			case "F":
-				frequency = 174.6 * Math.pow(2, octave);
+				frequency = 174.6;
 				break;
 			case "F#":
-				frequency = 185 * Math.pow(2, octave);
+				frequency = 185;
 				break;
 			case "G":
-				frequency = 195 * Math.pow(2, octave);
+				frequency = 195;
 				break;
 			case "G#":
-				frequency = 207.7 * Math.pow(2, octave);
+				frequency = 207.7;
 				break;
 		}
 
 		var osc1Gate = context.createGain();
-		osc1Gate.connect(self.Poly.SawGain);
+		osc1Gate.connect(self.Poly.LP);
 		osc1Gate.gain.value = 0;
 
 		var osc2Gate = context.createGain();
-		osc2Gate.connect(self.Poly.SquareGain);
+		osc2Gate.connect(self.Poly.SawDetuneGain);
 		osc2Gate.gain.value = 0;
 
-		var osc1 = context.createOscillator();
-		osc1.type = "sawtooth";
-		osc1.frequency.value = frequency;
-		osc1.connect(osc1Gate);
+		var osc3Gate = context.createGain();
+		osc3Gate.connect(self.Poly.SineGain);
+		osc3Gate.gain.value = 0;
 
-		var osc2 = context.createOscillator();
-		osc2.type = "square";
-		osc2.frequency.value = frequency;
-		osc2.connect(osc2Gate);
+		this.osc1 = context.createOscillator();
+		this.osc1.type = "sawtooth";
+		this.osc1.frequency.value = frequency * Math.pow(2, octave);
+		this.osc1.connect(osc1Gate);
 
-		osc1.start(0);
-		osc2.start(0);
+		this.osc2 = context.createOscillator();
+		this.osc2.type = "sawtooth";
+		this.osc2.detune.value = 8;
+		this.osc2.frequency.value = frequency * Math.pow(2, octave);
+		this.osc2.connect(osc2Gate);
 
-		var oscillators = [osc1, osc2];
+		this.osc3 = context.createOscillator();
+		this.osc3.type = "sine";
+		this.osc3.frequency.value = frequency * Math.pow(2, octave);
+		this.osc3.connect(osc3Gate);
+
+		this.osc1.start(0);
+		this.osc2.start(0);
+		this.osc3.start(0);
+
+		var oscillators = [this.osc1, this.osc2];
 		this.Trigger = function(at) {
-			// attack
-			osc1Gate.gain.linearRampToValueAtTime(1, at);
-			osc2Gate.gain.linearRampToValueAtTime(1, at);
+			osc1Gate.gain.setTargetAtTime(1, at, self.Poly.Attack);
+			osc2Gate.gain.setTargetAtTime(1, at, self.Poly.Attack);
+			osc3Gate.gain.setTargetAtTime(1, at, self.Poly.Attack);
 
-			// release
-			osc1Gate.gain.linearRampToValueAtTime(0, at + .1);
-			osc2Gate.gain.linearRampToValueAtTime(0, at + .1);
+			osc1Gate.gain.setTargetAtTime(1 * self.Poly.Sustain, at + self.Poly.Attack, self.Poly.Decay);
+			osc2Gate.gain.setTargetAtTime(1 * self.Poly.Sustain, at + self.Poly.Attack, self.Poly.Decay);
+			osc3Gate.gain.setTargetAtTime(1 * self.Poly.Sustain, at + self.Poly.Attack, self.Poly.Decay);
+
+			osc1Gate.gain.setTargetAtTime(0, at + self.Poly.Attack + self.Poly.Decay, self.Poly.Release);
+			osc2Gate.gain.setTargetAtTime(0, at + self.Poly.Attack + self.Poly.Decay, self.Poly.Release);
+			osc3Gate.gain.setTargetAtTime(0, at + self.Poly.Attack + self.Poly.Decay, self.Poly.Release);
 		}
 	};
 
@@ -215,8 +239,6 @@ Engine = function(context) {
 			$($("#poly-lane-" + sequence[i].what.toString().replace(/#/, "s").toLowerCase() + " > .note")[sequence[i].when - 1]).css("background-color", ColorRed);
 		}
 	};
-
-	var self = this;
 
 	for (var i = 0; i < 16; i++) {
 		$('<button class="note"></button>').data("note", new self.DrumMachine.OH()).appendTo($("#drummachine-sequencer-oh"));
@@ -238,7 +260,7 @@ Engine = function(context) {
 		$('<button class="note"></button>').data("note", new self.Poly.Note("C", 0)).appendTo($("#poly-lane-c"));
 	}
 
-	this.LoadSequence = function(context, tempo) {
+	this.LoadSequence = function(tempo) {
 		// assume 16th notes for the time being.
 		var tickTime = 60 / tempo / 4;
 		var t = false;
@@ -254,9 +276,9 @@ Engine = function(context) {
 				}
 			}
 
-//			t = setTimeout(function() {
-//				$("#sequencer-start").click();	
-//			}, tickTime * 16 * 1000);
+			t = setTimeout(function() {
+				$("#sequencer-start").click();	
+			}, tickTime * 16 * 1000);
 		});
 
 		$("#sequencer-stop").click(function() {
@@ -268,6 +290,7 @@ Engine = function(context) {
 		var master_knob_width = 50;
 		var drum_control_knob_width = 50;
 		var poly_control_knob_width = 50;
+		var poly_control_knob_height = 50;
 
 		$("#master-gain > input").knob({
 			"width": master_knob_width,
@@ -351,56 +374,71 @@ Engine = function(context) {
 			"value": 0,
 		});
 
+		// poly
+		$("#poly-env-attack").val(self.Poly.Attack * 1000).knob({
+			"width": poly_control_knob_width,
+			"height": poly_control_knob_height,
+			"min": 0,
+			"max": 100,
+			"value": 1,
+			"step": 1, // approx 1 ms
+			"change": function(v) { self.Poly.Attack = v / 1000; }
+		});
 
-		// lead
-//		$("#lead-saw-gain > input").knob({
-//			"width": lead_control_knob_width,
-//			"min": lead.SawGain.gain.minValue,
-//			"max": lead.SawGain.gain.maxValue,
-//			"value": lead.SawGain.gain.value,
-//		});
-//
-//		$("#lead-square-gain > input").knob({
-//			"width": lead_control_knob_width,
-//			"min": lead.SquareGain.gain.minValue,
-//			"max": lead.SquareGain.gain.maxValue,
-//			"value": lead.SquareGain.gain.value,
-//		});
-//
-//		$("#lead-saw-detune > input").knob({
-//			"width": lead_control_knob_width,
-//			"min": -100,
-//			"max": 0,
-//			"value": lead.SawDetune,
-//		});
-//
-//		$("#lead-square-detune > input").knob({
-//			"width": lead_control_knob_width,
-//			"min": -100,
-//			"max": 0,
-//			"value": lead.SquareDetune,
-//		});
-//
-//		$("#lead-filter-freq > input").knob({
-//			"width": lead_control_knob_width,
-//			"min": lead.LP.frequency.minValue,
-//			"max": lead.LP.frequency.maxValue,
-//			"value": lead.LP.frequency.value,
-//		});
-//
-//		$("#lead-filter-q > input").knob({
-//			"width": lead_control_knob_width,
-//			"min": lead.LP.Q.minValue,
-//			"max": lead.LP.Q.maxValue,
-//			"value": lead.LP.Q.value,
-//		});
-//		
+		$("#poly-env-decay").val(self.Poly.Decay * 1000).knob({
+			"width": poly_control_knob_width,
+			"height": poly_control_knob_height,
+			"min": 0,
+			"max": 1000,
+			"step": 10, // approx 1 ms
+			"change": function(v) { self.Poly.Decay = v / 1000; }
+		})
+
+		$("#poly-env-sustain").val(self.Poly.Sustain * 100).knob({
+			"width": poly_control_knob_width,
+			"height": poly_control_knob_height,
+			"min": 0,
+			"max": 100,
+			"step": 1, // percent of gain
+			"change": function(v) { self.Poly.Sustain = v / 100; }
+		});
+
+		$("#poly-env-release").val(self.Poly.Release * 1000).knob({
+			"width": poly_control_knob_width,
+			"height": poly_control_knob_height,
+			"min": 0,
+			"max": 1000,
+			"step": 10, // approx 10 ms
+			"change": function(v) { self.Poly.Release = v / 1000; }
+		});
+
+		$("#poly-osc2-gain").val(self.Poly.SawDetuneGain.gain.value * 100).knob({
+			"width": poly_control_knob_width,
+			"height": poly_control_knob_height,
+			"min": 0,
+			"max": 100,
+			"step": 1, 
+			"change": function(v) { self.Poly.SawDetuneGain.gain.value = v / 100; }
+		});
+
+		$("#poly-filter-freq").val(self.Poly.LP.frequency.value).knob({
+			"width": poly_control_knob_width,
+			"height": poly_control_knob_height,
+			"min": 100,
+			"max": 10000,
+			"step": 10, 
+			"change": function(v) { self.Poly.LP.frequency.value = v; }
+		});
+
 		$(".note").click(function() { 
-			var d = $(this).data();
+			var self = this;
+			var d = $(self).data();
 			if (d.on > 0) {
 				d.on = 0;
+				$(self).css("background-color", ColorBase2);
 			} else {
-				d.on = 3; 
+				d.on = $(self).index(); // index + 1 offset - 1 label = 0
+				$(self).css("background-color", ColorRed);
 			}
 		});
 	}
