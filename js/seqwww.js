@@ -89,14 +89,32 @@ Engine = function(context) {
 	bdGate.gain.value = 0;
 	bdGate.connect(this.DrumMachine.MasterGain);
 
+	var bdEnv = context.createGain();
+	bdEnv.gain.value = 0;
+	bdEnv.connect(this.DrumMachine.MasterGain);
+
+	var bdLP = context.createBiquadFilter();
+	bdLP.frequency.value = 100;
+	bdLP.Q.value = 0;
+	bdLP.connect(bdEnv);
+
 	var bdOsc1 = context.createOscillator();
-	bdOsc1.frequency.value = 100;
+	bdOsc1.frequency.value = 60;
 	bdOsc1.connect(bdGate);
 	bdOsc1.start(0);
 
+	var bdOsc2 = context.createOscillator();
+	bdOsc2.type = "sawtooth";
+	bdOsc2.frequency.value = 60;
+	bdOsc2.connect(bdLP);
+	bdOsc2.start(0);
+
 	this.DrumMachine.BD.Trigger = function(at) {
-			bdGate.gain.setTargetAtTime(1, at, .01);
-			bdGate.gain.setTargetAtTime(0, at + .1, 1);
+			bdGate.gain.setTargetAtTime(1, at, .03);
+			bdGate.gain.setTargetAtTime(0, at + .3, .01);
+
+			bdEnv.gain.setTargetAtTime(1, at, .01);
+			bdEnv.gain.setTargetAtTime(0, at + .05, .03);
 	};
 
 	//SD
@@ -104,19 +122,63 @@ Engine = function(context) {
 	sdGate.gain.value = 0;
 	sdGate.connect(this.DrumMachine.MasterGain);
 
+	var sdWNEnv = context.createGain();
+	sdWNEnv.connect(sdGate);
+	sdWNEnv.gain.value = 0;
+
+	var sdOsc1Env = context.createGain();
+	sdOsc1Env.connect(this.DrumMachine.MasterGain);
+	sdOsc1Env.gain.value = 0;
+
+	var sdOsc2Env = context.createGain();
+	sdOsc2Env.connect(this.DrumMachine.MasterGain);
+	sdOsc2Env.gain.value = 0;
+
+	var sdHP = context.createBiquadFilter();
+	sdHP.type = "highpass";
+	sdHP.frequency.value = 10000;
+	sdHP.connect(sdGate);
+
+	var sdLP = context.createBiquadFilter();
+	sdLP.type = "lowpass";
+	sdLP.frequency.value = 8000;
+	sdLP.connect(sdHP);
+	sdLP.connect(sdWNEnv);
+
+	// borrowed from https://developer.tizen.org/documentation/articles/advanced-web-audio-api-usage
+	var whiteNoiseBuffer = context.createBuffer(1, 44100, 44100);
+	var data = whiteNoiseBuffer.getChannelData(0);
+	for (var i = 0; i < data.length; i++) {
+		data[i] = (Math.random() - 0.5) * 2;
+	}
+
+	var whiteNoise = context.createBufferSource();
+	whiteNoise.loop = true;
+	whiteNoise.buffer = whiteNoiseBuffer;
+	whiteNoise.connect(sdLP);
+	whiteNoise.start(0);
+
 	var sdOsc1 = context.createOscillator();
-	sdOsc1.frequency.value = 476;
-	sdOsc1.connect(sdGate);
+	sdOsc1.type = "sine";
+	sdOsc1.connect(sdOsc1Env);
+	sdOsc1.frequency.value = 330;
 	sdOsc1.start(0);
 
 	var sdOsc2 = context.createOscillator();
-	sdOsc2.frequency.value = 238;
-	sdOsc2.connect(sdGate);
+	sdOsc2.type = "sine";
+	sdOsc2.connect(sdOsc2Env);
+	sdOsc2.frequency.value = 180;
 	sdOsc2.start(0);
 
 	this.DrumMachine.SD.Trigger = function(at) {
 			sdGate.gain.setTargetAtTime(1, at, 0);
-			sdGate.gain.setTargetAtTime(0, at + .06, 0);
+			sdGate.gain.setTargetAtTime(0, at + .05, .03);
+
+			sdOsc1Env.gain.setTargetAtTime(.1, at, 0);
+			sdOsc1Env.gain.setTargetAtTime(0, at + .05, .03);
+
+			sdOsc2Env.gain.setTargetAtTime(.1, at, 0);
+			sdOsc2Env.gain.setTargetAtTime(0, at + .03, .03);
 	};
 
 	//CH
@@ -135,8 +197,8 @@ Engine = function(context) {
 	chHGain2.gain.value = 0;
 
 	var chHBPSplit = context.createChannelSplitter(2);
-	chHBPSplit.connect(chHGain1);
-	chHBPSplit.connect(chHGain2);
+	chHBPSplit.connect(chHGain1, 0);
+	chHBPSplit.connect(chHGain2, 1);
 
 	var chHBP = context.createBiquadFilter();
 	chHBP.type = "bandpass";
@@ -339,7 +401,7 @@ Engine = function(context) {
 		var t = false;
 		$("#sequencer-start").click(function() {
 			var now = context.currentTime;
-			var notes = $(".drummachine-lane > .note");
+			var notes = $(".note");
 			for (var i = 0; i < notes.length; i++) {
 				var d = $(notes[i]).data("note");
 				var on = $(notes[i]).data("on");

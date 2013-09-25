@@ -25,35 +25,42 @@
 					engine.SetupUI();
 
 					sequence = [
+					{ what: DrumSound.BD, when: 1 },
 					{ what: DrumSound.CH, when: 1 },
+					{ what: DrumSound.CH, when: 2 },
 					{ what: DrumSound.CH, when: 3 },
-					{ what: DrumSound.CH, when: 5 },
+					{ what: DrumSound.CH, when: 4 },
+					{ what: DrumSound.SD, when: 5 },
+					{ what: DrumSound.CH, when: 6 },
 					{ what: DrumSound.CH, when: 7 },
+					{ what: DrumSound.CH, when: 8 },
+					{ what: DrumSound.BD, when: 9 },
 					{ what: DrumSound.CH, when: 9 },
+					{ what: DrumSound.CH, when: 10 },
 					{ what: DrumSound.CH, when: 11 },
-					{ what: DrumSound.CH, when: 13 },
+					{ what: DrumSound.CH, when: 12 },
+					{ what: DrumSound.SD, when: 13 },
+					{ what: DrumSound.CH, when: 14 },
 					{ what: DrumSound.CH, when: 15 },
+					{ what: DrumSound.CH, when: 16 },
 					];
 
 					polySequence = [
 					{ what: "D#", when: 1 },
 					{ what: "C", when: 1 },
 					{ what: "G#", when: 1 },
-					{ what: "D#", when: 5 },
-					{ what: "C", when: 5 },
-					{ what: "G", when: 5 },
 					{ what: "D#", when: 9 },
-					{ what: "A#", when: 9 },
+					{ what: "C", when: 9 },
 					{ what: "G", when: 9 },
 					{ what: "D#", when: 13 },
 					{ what: "A#", when: 13 },
-					{ what: "F", when: 13 },
+					{ what: "G", when: 13 },
 					];
 
 					engine.DrumMachine.LoadSequence(sequence);
 					engine.Poly.LoadSequence(polySequence);
 
-					engine.LoadSequence(120);
+					engine.LoadSequence(130);
 				}
 				catch(e) {
 					document.write("<h2>Sorry, web audio is not supported by this browser</h2>");
