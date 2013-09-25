@@ -7,79 +7,114 @@
 		<script type="text/javascript">
 			(function() {
 			 var config = {
-				kitId: 'zoz0eob',
-				scriptTimeout: 3000
-				};
-				var h=document.getElementsByTagName("html")[0];h.className+=" wf-loading";var t=setTimeout(function(){h.className=h.className.replace(/(\s|^)wf-loading(\s|$)/g," ");h.className+=" wf-inactive"},config.scriptTimeout);var tk=document.createElement("script"),d=false;tk.src='//use.typekit.net/'+config.kitId+'.js';tk.type="text/javascript";tk.async="true";tk.onload=tk.onreadystatechange=function(){var a=this.readyState;if(d||a&&a!="complete"&&a!="loaded")return;d=true;clearTimeout(t);try{Typekit.load(config)}catch(b){}};var s=document.getElementsByTagName("script")[0];s.parentNode.insertBefore(tk,s)
-				})();
-		</script>
-		<link rel="stylesheet" type="text/css" href="/css/seqwww.css">
-		<script>
-			$(document).ready(function() {
-				try {
-					window.AudioContext = window.AudioContext || window.webkitAudioContext;
-					var context = new AudioContext();
+kitId: 'zoz0eob',
+scriptTimeout: 3000
+};
+var h=document.getElementsByTagName("html")[0];h.className+=" wf-loading";var t=setTimeout(function(){h.className=h.className.replace(/(\s|^)wf-loading(\s|$)/g," ");h.className+=" wf-inactive"},config.scriptTimeout);var tk=document.createElement("script"),d=false;tk.src='//use.typekit.net/'+config.kitId+'.js';tk.type="text/javascript";tk.async="true";tk.onload=tk.onreadystatechange=function(){var a=this.readyState;if(d||a&&a!="complete"&&a!="loaded")return;d=true;clearTimeout(t);try{Typekit.load(config)}catch(b){}};var s=document.getElementsByTagName("script")[0];s.parentNode.insertBefore(tk,s)
+})();
+</script>
+<link rel="stylesheet" type="text/css" href="/css/seqwww.css">
+<script>
+	$(document).ready(function() {
+		try {
+			window.AudioContext = window.AudioContext || window.webkitAudioContext;
+			var context = new AudioContext();
 
-					engine = new Engine(context);
+			engine = new Engine(context);
 
-					engine.SetupUI();
+			engine.SetupUI();
 
-					sequence = [
-					{ what: DrumSound.BD, when: 1 },
-					{ what: DrumSound.CH, when: 1 },
-					{ what: DrumSound.CH, when: 2 },
-					{ what: DrumSound.CH, when: 3 },
-					{ what: DrumSound.CH, when: 4 },
-					{ what: DrumSound.SD, when: 5 },
-					{ what: DrumSound.CH, when: 6 },
-					{ what: DrumSound.CH, when: 7 },
-					{ what: DrumSound.CH, when: 8 },
-					{ what: DrumSound.BD, when: 9 },
-					{ what: DrumSound.CH, when: 9 },
-					{ what: DrumSound.CH, when: 10 },
-					{ what: DrumSound.CH, when: 11 },
-					{ what: DrumSound.CH, when: 12 },
-					{ what: DrumSound.SD, when: 13 },
-					{ what: DrumSound.CH, when: 14 },
-					{ what: DrumSound.CH, when: 15 },
-					{ what: DrumSound.CH, when: 16 },
-					];
+			sequence = [
+			{ what: DrumSound.BD, when: 1 },
+			{ what: DrumSound.CH, when: 1 },
+			{ what: DrumSound.CH, when: 2 },
+			{ what: DrumSound.CH, when: 3 },
+			{ what: DrumSound.CH, when: 4 },
+			{ what: DrumSound.SD, when: 5 },
+			{ what: DrumSound.CH, when: 6 },
+			{ what: DrumSound.CH, when: 7 },
+			{ what: DrumSound.CH, when: 8 },
+			{ what: DrumSound.BD, when: 9 },
+			{ what: DrumSound.CH, when: 9 },
+			{ what: DrumSound.CH, when: 10 },
+			{ what: DrumSound.CH, when: 11 },
+			{ what: DrumSound.CH, when: 12 },
+			{ what: DrumSound.SD, when: 13 },
+			{ what: DrumSound.CH, when: 14 },
+			{ what: DrumSound.CH, when: 15 },
+			{ what: DrumSound.CH, when: 16 },
+			{ what: DrumSound.BD, when: 17 },
+			{ what: DrumSound.CH, when: 17 },
+			{ what: DrumSound.CH, when: 18 },
+			{ what: DrumSound.CH, when: 19 },
+			{ what: DrumSound.CH, when: 20 },
+			{ what: DrumSound.SD, when: 21 },
+			{ what: DrumSound.CH, when: 22 },
+			{ what: DrumSound.CH, when: 23 },
+			{ what: DrumSound.CH, when: 24 },
+			{ what: DrumSound.BD, when: 25 },
+			{ what: DrumSound.CH, when: 25 },
+			{ what: DrumSound.CH, when: 26 },
+			{ what: DrumSound.CH, when: 27 },
+			{ what: DrumSound.CH, when: 28 },
+			{ what: DrumSound.SD, when: 29 },
+			{ what: DrumSound.CH, when: 30 },
+			{ what: DrumSound.CH, when: 31 },
+			{ what: DrumSound.CH, when: 32 },
+			];
 
-					polySequence = [
-					{ what: "D#", when: 1 },
-					{ what: "C", when: 1 },
-					{ what: "G#", when: 1 },
-					{ what: "D#", when: 9 },
-					{ what: "C", when: 9 },
-					{ what: "G", when: 9 },
-					{ what: "D#", when: 13 },
-					{ what: "A#", when: 13 },
-					{ what: "G", when: 13 },
-					];
+			polySequence = [
+			{ what: "D#", when: 1 },
+			{ what: "C", when: 1 },
+			{ what: "G#", when: 1 },
+			{ what: "D#", when: 9 },
+			{ what: "C", when: 9 },
+			{ what: "G", when: 9 },
+			{ what: "D#", when: 17 },
+			{ what: "A#", when: 17 },
+			{ what: "G", when: 17 },
+			{ what: "D#", when: 25 },
+			{ what: "C", when: 25 },
+			{ what: "G", when: 25 },
+			];
 
-					engine.DrumMachine.LoadSequence(sequence);
-					engine.Poly.LoadSequence(polySequence);
+			bassSequence = [
+			{ what: "D#", when: 1 },
+			{ what: "C", when: 2 },
+			{ what: "G#", when: 3 },
+			{ what: "D#", when: 4 },
+			{ what: "C", when: 5 },
+			{ what: "G", when: 6 },
+			{ what: "D#", when: 7 },
+			{ what: "A#", when: 8 },
+			{ what: "G", when: 9 },
+			{ what: "G", when: 10 },
+			{ what: "G", when: 11 },
+			{ what: "G", when: 12 },
+			{ what: "G", when: 13 },
+			{ what: "G", when: 14 },
+			{ what: "G", when: 15 },
+			{ what: "G", when: 16 },
+			];
 
-					engine.LoadSequence(130);
-				}
-				catch(e) {
-					document.write("<h2>Sorry, web audio is not supported by this browser</h2>");
-					console.log(e.toString());
-				}
-			});
-		</script>
+			engine.DrumMachine.LoadSequence(sequence);
+			engine.Poly.LoadSequence(polySequence);
+			engine.Bass.LoadSequence(bassSequence);
+
+			engine.LoadSequence(100);
+		}
+		catch(e) {
+			document.write("<h2>Sorry, web audio is not supported by this browser</h2>");
+			console.log(e.toString());
+		}
+	});
+</script>
 	</head>
 
 	<body>
-		<div id="transport">
-			<span id="sequencer-start">PLAY</span>
-			<span id="sequencer-stop">STOP</span>
-		</div>
+
 		<div id="instruments">
 			<div id="drummachine">
-				<div id="drummachine-controls">
-					<span id="drummachine-controls-bd-decay"><input type="text"></span>
-				</div>
 				<div class="drummachine-lane" id="drummachine-sequencer-oh">
 					<span class="drummachine-sequencer-label">OH</span> 
 				</div>
@@ -95,15 +130,18 @@
 				</div>
 
 			</div>
+
 			<div id="poly">
 				<div id="poly-controls">
-					<div class="hcontrol"><label><input id="poly-env-attack" type="text">attack</label></div>
-					<div class="hcontrol"><label><input id="poly-env-decay" type="text">decay</label></div>
-					<div class="hcontrol"><label><input id="poly-env-sustain" type="text">sustain</label></div>
-					<div class="hcontrol"><label><input id="poly-env-release" type="text">release</label></div>
+					<div>
+						<span><label><input id="poly-env-attack" type="text">attack</label></span>
+						<span><label><input id="poly-env-release" type="text">release</label></span>
+					</div>
 
-					<div class="hcontrol"><label><input id="poly-filter-freq" type="text">cutoff</label></div>
-					<div class="hcontrol"><label><input id="poly-filter-q" type="text">resonance</label></div>
+					<div>
+						<span class="hcontrol"><label><input id="poly-filter-freq" type="text">cutoff</label></span>
+						<span class="hcontrol"><label><input id="poly-filter-q" type="text">resonance</label></span>
+					</div>
 				</div>
 				<div id="poly-sequencer">
 					<div class="poly-sequencer-lane" id="poly-lane-e2">
@@ -147,24 +185,35 @@
 					</div>
 				</div>
 			</div>
+			<div id="bass">
+				<div id="bass-controls">
+					<div>
+						<span><label><input id="bass-env-attack" type="text">attack</label></span>
+						<span><label><input id="bass-env-decay" type="text">decay</label></span>
+						<span><label><input id="bass-filter-freq" type="text">cutoff</label></span>
+						<span><label><input id="bass-filter-q" type="text">resonance</label></span>
+					</div>
+				</div>
+				<div id="bass-sequencer">
+					<div id="bass-sequencer-lane"></div>
+				</div>
+			</div>
 		</div>
 		<div id="master">
+			<div id="transport">
+				<span id="sequencer-start">PLAY</span>
+				<span id="sequencer-stop">STOP</span>
+			</div>
 			<div>
 				<span id="master-eq-low"><input type="text"></span>
 				<span id="master-eq-mid"><input type="text"></span>
 				<span id="master-eq-high"><input type="text"></span>
-				<span id="master-gain"><input type="text"></span>
 			</div>
 			<div>
 				<span id="master-comp-threshold"><input type="text"></span>
 				<span id="master-comp-ratio"><input type="text"></span>
 				<span id="master-comp-attack"><input type="text"></span>
 				<span id="master-comp-release"><input type="text"></span>
-				<span id="master-dist-amount"><input type="text"></span>
-			</div>
-			<div>
-				<td id="master-delay">delay</td>
-				<td id="master-reverb">reverb</td>
 			</div>
 		</div>
 	</body>

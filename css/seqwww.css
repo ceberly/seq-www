@@ -1,75 +1,71 @@
 body {
-	width: 90%;
+	width: 80%;
 	height: 90%;
 	margin: auto;
 	color: black;
-	font-family: "source-code-pro", monospace;
-	font-size: .75em;
+	font-family: monospace;
 }
 
 #instruments {
-	width: 74%;
+	width: 80%;
 	height: 100%;
 	float: left;
 }
 
 #master {
 	float: right;
-	border: 1px solid green;
-	width: 24%;
+	width: 20%;
 	height: 100%;
+	background-color: #586e75;
+	box-shadow: 8px 0px 6px -6px black;
 }
 
 #drummachine {
 	width: 100%;
-	height: 50%;
-	border-bottom: 1px solid #586e75;
+	color: #b58900;
+	font-size: 1em;
+	background-color: #002b36;
 }
 
 #drummachine-controls {
-	width: 100%;
-	height: 20%;
 }
 
 .drummachine-lane {
-	margin: auto;
-	height: 10%;
-	width: 90%;
 }
 
-.note {
-	margin-left: auto;
-	margin-right: auto;
-	background-color: #eee8d5;
-	width: 4%;
-	height: 75%;
-	border: 1px solid #586e75;
+.drummachine-lane > .note {
+	background-color: #fdf6e3;
+	border: 1px solid #002b36;
 }
+
+
 
 #poly {
-	width: 100%;
-	height: 50%;
-	border-bottom: 1px solid #586e75;
+	background-color: rgb(240,240,240);
+	color: rgb(110, 110, 110);
 }
 
 #poly-controls {
-	width: 100%;
-	height: 30%;
+	float: right;
 }
 
 #poly-sequencer {
-	width: 100%;
-	height: 70%;
+	float: left;
+	width: 90%;
+	height: 100%;
 }
 
 .poly-sequencer-lane {
-	margin: auto;
+	margin: 1em;
 	width: 90%;
-	height: 8%;
+}
+
+.poly-sequencer-lane > .note {
+	background-color: #fdf6e3;
+	border: 1px solid #002b36;
 }
 
 .hcontrol {
-	font-size: .50em;
 	display: inline-block;
 }
 
