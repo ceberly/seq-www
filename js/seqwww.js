@@ -99,19 +99,19 @@ Engine = function(context) {
 	bdLP.connect(bdEnv);
 
 	var bdOsc1 = context.createOscillator();
-	bdOsc1.frequency.value = 60;
+	bdOsc1.frequency.value = 65;
 	bdOsc1.connect(bdGate);
 	bdOsc1.start(0);
 
 	var bdOsc2 = context.createOscillator();
-	bdOsc2.type = "sawtooth";
-	bdOsc2.frequency.value = 60;
+	bdOsc2.type = "square";
+	bdOsc2.frequency.value = 65;
 	bdOsc2.connect(bdLP);
 	bdOsc2.start(0);
 
 	this.DrumMachine.BD.Trigger = function(at) {
 			bdGate.gain.setTargetAtTime(1, at, .03);
-			bdGate.gain.setTargetAtTime(0, at + .3, .01);
+			bdGate.gain.setTargetAtTime(0, at + .05, .1);
 
 			bdEnv.gain.setTargetAtTime(1, at, .01);
 			bdEnv.gain.setTargetAtTime(0, at + .05, .03);
@@ -172,10 +172,10 @@ Engine = function(context) {
 
 	this.DrumMachine.SD.Trigger = function(at) {
 			sdGate.gain.setTargetAtTime(1, at, 0);
-			sdGate.gain.setTargetAtTime(0, at + .05, .03);
+			sdGate.gain.setTargetAtTime(0, at + .03, .03);
 
 			sdOsc1Env.gain.setTargetAtTime(.1, at, 0);
-			sdOsc1Env.gain.setTargetAtTime(0, at + .05, .03);
+			sdOsc1Env.gain.setTargetAtTime(0, at + .03, .03);
 
 			sdOsc2Env.gain.setTargetAtTime(.1, at, 0);
 			sdOsc2Env.gain.setTargetAtTime(0, at + .03, .03);
@@ -401,7 +401,7 @@ Engine = function(context) {
 		var t = false;
 		$("#sequencer-start").click(function() {
 			var now = context.currentTime;
-			var notes = $(".note");
+			var notes = $(".drummachine-lane > .note");
 			for (var i = 0; i < notes.length; i++) {
 				var d = $(notes[i]).data("note");
 				var on = $(notes[i]).data("on");
