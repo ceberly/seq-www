@@ -95,6 +95,22 @@ var h=document.getElementsByTagName("html")[0];h.className+=" wf-loading";var t=
 			{ what: "G", when: 14 },
 			{ what: "G", when: 15 },
 			{ what: "G", when: 16 },
+			{ what: "D#", when: 17 },
+			{ what: "C", when: 18 },
+			{ what: "G#", when: 19 },
+			{ what: "D#", when: 20 },
+			{ what: "C", when: 21 },
+			{ what: "G", when: 22 },
+			{ what: "D#", when: 23 },
+			{ what: "A#", when: 24 },
+			{ what: "G", when: 25 },
+			{ what: "G", when: 26 },
+			{ what: "G", when: 27 },
+			{ what: "G", when: 28 },
+			{ what: "G", when: 29 },
+			{ what: "G", when: 30 },
+			{ what: "G", when: 31 },
+			{ what: "G", when: 32 },
 			];
 
 			engine.DrumMachine.LoadSequence(sequence);
@@ -191,10 +207,10 @@ var h=document.getElementsByTagName("html")[0];h.className+=" wf-loading";var t=
 			<div id="bass">
 				<div id="bass-controls">
 					<div>
-						<span><label><input id="bass-env-attack" type="text">attack</label></span>
-						<span><label><input id="bass-env-decay" type="text">decay</label></span>
-						<span><label><input id="bass-filter-freq" type="text">cutoff</label></span>
-						<span><label><input id="bass-filter-q" type="text">resonance</label></span>
+						<label><input id="bass-env-attack" type="text">attack</label>
+						<label><input id="bass-env-decay" type="text">decay</label>
+						<label><input id="bass-filter-freq" type="text">cutoff</label>
+						<label><input id="bass-filter-q" type="text">resonance</label>
 					</div>
 				</div>
 				<div id="bass-sequencer">
@@ -204,19 +220,27 @@ var h=document.getElementsByTagName("html")[0];h.className+=" wf-loading";var t=
 		</div>
 		<div id="master">
 			<div id="transport">
-				<span id="sequencer-start">PLAY</span>
-				<span id="sequencer-stop">STOP</span>
+				<div><u>SEQ-WWW</u></div>
+				<div>
+					<span id="sequencer-start">PLAY</span>
+					<span id="sequencer-stop">STOP</span>
+				</div>
 			</div>
 			<div>
-				<span id="master-eq-low"><input type="text"></span>
-				<span id="master-eq-mid"><input type="text"></span>
-				<span id="master-eq-high"><input type="text"></span>
+				<div>EQ</div>
+				<div style="margin-top: 1em;">
+					<label id="master-eq-low"><input type="text">HPF</label>
+					<label id="master-eq-mid"><input type="text">MID</label>
+					<label id="master-eq-high"><input type="text">LPF</label>
+				</div>
 			</div>
-			<div>
-				<span id="master-comp-threshold"><input type="text"></span>
-				<span id="master-comp-ratio"><input type="text"></span>
-				<span id="master-comp-attack"><input type="text"></span>
-				<span id="master-comp-release"><input type="text"></span>
+			<div style="margin-top: 2em;">
+				<div>Comp</div>
+				<div style="margin-top: 1em;">
+					<label id="master-comp-ratio"><input type="text">ratio</label>
+					<label id="master-comp-attack"><input type="text">attack</label>
+					<label id="master-comp-release"><input type="text">release</label>
+				</div>
 			</div>
 		</div>
 	</body>

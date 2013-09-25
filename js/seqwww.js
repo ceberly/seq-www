@@ -51,46 +51,39 @@ Engine = function(context) {
 	var self = this;
 
 	this.Bus = {
-		Gain: context.createGain(),
-		//Delay: context.createDelay(),
 		Comp: context.createDynamicsCompressor(),
-		HighShelf: context.createBiquadFilter(),
+		HighPass: context.createBiquadFilter(),
 		Peaking: context.createBiquadFilter(),
-		LowShelf: context.createBiquadFilter(),
+		LowPass: context.createBiquadFilter(),
 	};
 
-	this.Bus.Input = this.Bus.LowShelf;
 
-	this.Bus.HighShelf.type = "highshelf";
-	this.Bus.HighShelf.frequency.value = 8000;
+	this.Bus.HighPass.type = "highpass";
+	this.Bus.HighPass.frequency.value = 100;
 
 	this.Bus.Peaking.type = "peaking";
-	this.Bus.Peaking.frequency.value = 1200;
+	this.Bus.Peaking.frequency.value = 8000;
+	this.Bus.Peaking.gain.value = 0;
 
-	this.Bus.LowShelf.type = "lowshelf";
-	this.Bus.LowShelf.frequency.value = 100;
+	this.Bus.LowPass.type = "lowpass";
+	this.Bus.LowPass.frequency.value = 20000;
 
-	this.Bus.Gain.connect(context.destination);
-	this.Bus.Comp.connect(this.Bus.Gain);
-	this.Bus.HighShelf.connect(this.Bus.Comp);
-	this.Bus.Peaking.connect(this.Bus.HighShelf);
-	this.Bus.LowShelf.connect(this.Bus.Peaking);
+	this.Bus.Comp.threshold = -5;
+	this.Bus.Comp.ratio.value = 2;
+	this.Bus.Comp.attack.value = .05;
+	this.Bus.Comp.release.value = .5;
+
+	this.Bus.Input = this.Bus.HighPass;
+
+	this.Bus.Comp.connect(context.destination);
+	this.Bus.LowPass.connect(this.Bus.Comp);
+	this.Bus.Peaking.connect(this.Bus.LowPass);
+	this.Bus.HighPass.connect(this.Bus.Peaking);
 
 	var bus = this.Bus;
 
 	this.DrumMachine = {
 		MasterGain: context.createGain(),
-		BD: {
-			Decay: 0
-		},
-		SD: {
-			Decay: 0
-		},
-		CH: {
-
-		},
-		OH: {
-		},
 		LoadSequence: function(sequence) {
 			$(".drummachine-lane > .note").data("on", 0);
 			for (var i = 0; i < sequence.length; i++) {
@@ -118,13 +111,10 @@ Engine = function(context) {
 		},
 	};
 
+	this.DrumMachine.MasterGain.gain.value = .3333333;
 	this.DrumMachine.MasterGain.connect(bus.Input);
 
 	//BD
-	var bdGate = context.createGain();
-	bdGate.gain.value = 0;
-	bdGate.connect(this.DrumMachine.MasterGain);
-
 	var bdEnv = context.createGain();
 	bdEnv.gain.value = 0;
 	bdEnv.connect(this.DrumMachine.MasterGain);
@@ -136,7 +126,7 @@ Engine = function(context) {
 
 	var bdOsc1 = context.createOscillator();
 	bdOsc1.frequency.value = 65;
-	bdOsc1.connect(bdGate);
+	bdOsc1.connect(bdEnv);
 	bdOsc1.start(0);
 
 	var bdOsc2 = context.createOscillator();
@@ -145,11 +135,14 @@ Engine = function(context) {
 	bdOsc2.connect(bdLP);
 	bdOsc2.start(0);
 
-	this.DrumMachine.BD.Trigger = function(at) {
-			bdGate.gain.setTargetAtTime(1, at, .03);
-			bdGate.gain.setTargetAtTime(0, at + .05, .1);
+	this.DrumMachine.BD = { Gain: 1 };
+	this.DrumMachine.SD = { Gain: 1 };
+	this.DrumMachine.CH = { Gain: 1 };
+	this.DrumMachine.OH = { Gain: 1 };
 
-			bdEnv.gain.setTargetAtTime(1, at, .01);
+	var bd = this.DrumMachine.BD;
+	this.DrumMachine.BD.Trigger = function(at) {
+			bdEnv.gain.setTargetAtTime(bd.Gain, at, .01);
 			bdEnv.gain.setTargetAtTime(0, at + .05, .03);
 	};
 
@@ -206,14 +199,15 @@ Engine = function(context) {
 	sdOsc2.frequency.value = 180;
 	sdOsc2.start(0);
 
+	var sd = this.DrumMachine.SD;
 	this.DrumMachine.SD.Trigger = function(at) {
-			sdGate.gain.setTargetAtTime(1, at, 0);
+			sdGate.gain.setTargetAtTime(sd.Gain - .5, at, 0);
 			sdGate.gain.setTargetAtTime(0, at + .03, .03);
 
-			sdOsc1Env.gain.setTargetAtTime(.1, at, 0);
+			sdOsc1Env.gain.setTargetAtTime(sd.Gain - .75, at, 0);
 			sdOsc1Env.gain.setTargetAtTime(0, at + .03, .03);
 
-			sdOsc2Env.gain.setTargetAtTime(.1, at, 0);
+			sdOsc2Env.gain.setTargetAtTime(sd.Gain - .75, at, 0);
 			sdOsc2Env.gain.setTargetAtTime(0, at + .03, .03);
 	};
 
@@ -232,15 +226,12 @@ Engine = function(context) {
 	chHGain2.connect(chHP);
 	chHGain2.gain.value = 0;
 
-	var chHBPSplit = context.createChannelSplitter(2);
-	chHBPSplit.connect(chHGain1, 0);
-	chHBPSplit.connect(chHGain2, 1);
-
 	var chHBP = context.createBiquadFilter();
 	chHBP.type = "bandpass";
 	chHBP.frequency.value = 7000;
 	chHBP.Q.value = 12;
-	chHBP.connect(chHBPSplit);
+	chHBP.connect(chHGain1);
+	chHBP.connect(chHGain2);
 
 	// low bandpass
 	var chLBGain = context.createGain();
@@ -253,54 +244,57 @@ Engine = function(context) {
 	chLBP.Q.value = 12;
 	chLBP.connect(chLBGain);
 
-	var chSplit = context.createChannelSplitter(2);
-	chSplit.connect(chLBP);
-	chSplit.connect(chHBP);
-
 	var chOsc1 = context.createOscillator();
 	chOsc1.type = "square";
 	chOsc1.frequency.value = 303;
-	chOsc1.connect(chSplit);
+	chOsc1.connect(chLBP);
+	chOsc1.connect(chHBP);
 	chOsc1.start(0);
 
 	var chOsc2 = context.createOscillator();
 	chOsc2.type = "square";
 	chOsc2.frequency.value = 176;
-	chOsc2.connect(chSplit);
+	chOsc2.connect(chLBP);
+	chOsc2.connect(chHBP);
 	chOsc2.start(0);
 
 	var chOsc3 = context.createOscillator();
 	chOsc3.type = "square";
 	chOsc3.frequency.value = 214;
-	chOsc3.connect(chSplit);
+	chOsc3.connect(chLBP);
+	chOsc3.connect(chHBP);
 	chOsc3.start(0);
 
 	var chOsc4 = context.createOscillator();
 	chOsc4.type = "square";
 	chOsc4.frequency.value = 119;
-	chOsc4.connect(chSplit);
+	chOsc4.connect(chLBP);
+	chOsc4.connect(chHBP);
 	chOsc4.start(0);
 
 	var chOsc5 = context.createOscillator();
 	chOsc5.type = "square";
 	chOsc5.frequency.value = 540;
-	chOsc5.connect(chSplit);
+	chOsc5.connect(chLBP);
+	chOsc5.connect(chHBP);
 	chOsc5.start(0);
 
 	var chOsc6 = context.createOscillator();
 	chOsc6.type = "square";
 	chOsc6.frequency.value = 800;
-	chOsc6.connect(chSplit);
+	chOsc6.connect(chLBP);
+	chOsc6.connect(chHBP);
 	chOsc6.start(0);
 
+	var ch = this.DrumMachine.CH;
 	this.DrumMachine.CH.Trigger = function(at) {
-		chHGain1.gain.setTargetAtTime(1, at, 0);
+		chHGain1.gain.setTargetAtTime(ch.Gain / 3, at, 0);
 		chHGain1.gain.setTargetAtTime(0, at + .01, .01);
 
-		chHGain2.gain.setTargetAtTime(1, at, 0);
+		chHGain2.gain.setTargetAtTime(ch.Gain / 3, at, 0);
 		chHGain2.gain.setTargetAtTime(0, at + .02, .01);
 
-		chLBGain.gain.setTargetAtTime(1, at, 0);
+		chLBGain.gain.setTargetAtTime(ch.Gain / 3, at, 0);
 		chLBGain.gain.setTargetAtTime(0, at + .02, .01);
 	};
 
@@ -315,6 +309,7 @@ Engine = function(context) {
 	var bass = this.Bass;
 
 	bass.Gain.connect(bus.Input);
+	bass.Gain.gain.value = .333333;
 	bass.LP.connect(this.Bass.Gain);
 
 	var bassEnv = context.createGain();
@@ -354,6 +349,7 @@ Engine = function(context) {
 		Release: .5, // seconds
 	};
 
+	this.Poly.MasterGain.gain.value = .333333;
 	this.Poly.MasterGain.connect(bus.Input);
 
 	this.Poly.LP.connect(this.Poly.MasterGain);
@@ -397,8 +393,8 @@ Engine = function(context) {
 		voices[voice].osc2.frequency.value = frequency * Math.pow(2, octave);
 
 		this.Trigger = function(at) {
-			voices[voice].osc1Gate.gain.setTargetAtTime(1, at, self.Poly.Attack);
-			voices[voice].osc2Gate.gain.setTargetAtTime(1, at, self.Poly.Attack);
+			voices[voice].osc1Gate.gain.setTargetAtTime(.5, at, self.Poly.Attack);
+			voices[voice].osc2Gate.gain.setTargetAtTime(.5, at, self.Poly.Attack);
 
 			voices[voice].osc1Gate.gain.setTargetAtTime(0, at + self.Poly.Attack + self.Poly.Decay, self.Poly.Release);
 			voices[voice].osc2Gate.gain.setTargetAtTime(0, at + self.Poly.Attack + self.Poly.Decay, self.Poly.Release);
@@ -443,7 +439,7 @@ Engine = function(context) {
 		var t = false;
 		$("#sequencer-start").click(function() {
 			var now = context.currentTime;
-			var notes = $("#bass-sequencer-lane > div > .note");
+			var notes = $(".note");
 			for (var i = 0; i < notes.length; i++) {
 				var d = $(notes[i]).data("note");
 				var on = $(notes[i]).data("on");
@@ -455,7 +451,7 @@ Engine = function(context) {
 
 			t = setTimeout(function() {
 				$("#sequencer-start").click();	
-			}, tickTime * 16 * 1000);
+			}, tickTime * 32 * 1000);
 		});
 
 		$("#sequencer-stop").click(function() {
@@ -463,76 +459,67 @@ Engine = function(context) {
 		});
 	}
 
-	this.SetupUI = function(bus, drummachine, poly) {
-		var master_knob_width = 50;
+	this.SetupUI = function() {
+		var master_knob_width = 40;
+		var master_knob_height = 40;
+		var dynamics_knob_width = 40;
+		var dynamics_knob_height = 40;
 		var bass_note_knob_height = 25;
 		var bass_note_knob_width = 25;
 		var drum_control_knob_width = 50;
 		var poly_control_knob_width = 50;
 		var poly_control_knob_height = 50;
 
-		$("#master-gain > input").knob({
+		$("#master-eq-high > input").val(bus.LowPass.frequency.value).knob({
 			"width": master_knob_width,
-			"min": this.Bus.Gain.gain.minValue * 100,
-			"max": this.Bus.Gain.gain.maxValue * 100,
-			"value": this.Bus.Gain.gain.value,
-			"change": function(v) { this.Bus.Gain.gain.value = (v / 100); }
+			"height": master_knob_height,
+			"min": 5000,
+			"max": 20000,
+			"change": function(v) { bus.LowPass.frequency.value = v; }
 		});
 
-		$("#master-eq-high > input").knob({
+		$("#master-eq-low > input").val(bus.HighPass.frequency.value).knob({
 			"width": master_knob_width,
-			"min": this.Bus.HighShelf.gain.minValue,
-			"max": this.Bus.HighShelf.gain.maxValue,
-			"value": 0,
-			"change": function(v) { this.Bus.HighShelf.gain.value = v; }
+			"height": master_knob_height,
+			"min": 0,
+			"max": 1000,
+			"change": function(v) { bus.HighPass.frequency.value = v; }
 		});
 
-		$("#master-eq-low > input").knob({
+		$("#master-eq-mid > input").val(bus.Peaking.gain.value).knob({
 			"width": master_knob_width,
-			"min": this.Bus.LowShelf.gain.minValue,
-			"max": this.Bus.LowShelf.gain.maxValue,
-			"value": 0,
-			"change": function(v) { this.Bus.LowShelf.gain.value = v; }
+			"height": master_knob_height,
+			"min": -10,
+			"max": 10,
+			"step": 1,
+			"change": function(v) { bus.Peaking.gain.value = v; }
 		});
 
-		$("#master-eq-mid > input").knob({
-			"width": master_knob_width,
-			"min": this.Bus.Peaking.gain.minValue,
-			"max": this.Bus.Peaking.gain.maxValue,
-			"value": 0,
-			"change": function(v) { this.Bus.Peaking.gain.value = v; }
-		});
-
-		$("#master-comp-threshold > input").knob({
-			"width": master_knob_width,
-			"min": this.Bus.Comp.threshold.minValue,
-			"max": this.Bus.Comp.threshold.maxValue,
-			"value": this.Bus.Comp.threshold.value,
-			"change": function(v) { this.Bus.Comp.threshold.value = v; }
-		});
-
-		$("#master-comp-ratio > input").knob({
-			"width": master_knob_width,
-			"min": this.Bus.Comp.ratio.minValue,
-			"max": this.Bus.Comp.ratio.maxValue,
+		$("#master-comp-ratio > input").val(bus.Comp.ratio.value).knob({
+			"width": dynamics_knob_width,
+			"height": dynamics_knob_height,
+			"min": bus.Comp.ratio.minValue,
+			"max": bus.Comp.ratio.maxValue,
 			"value": this.Bus.Comp.ratio.value,
-			"change": function(v) { this.Bus.Comp.ratio.value = v; }
+			"change": function(v) { bus.Comp.ratio.value = v; }
 		});
 
-		$("#master-comp-attack > input").knob({
-			"width": master_knob_width,
-			"min": this.Bus.Comp.attack.minValue,
-			"max": this.Bus.Comp.attack.maxValue,
-			"value": this.Bus.Comp.attack.value,
-			"change": function(v) { this.Bus.Comp.attack.value = v; }
+		$("#master-comp-attack > input").val(parseInt(bus.Comp.attack.value * 1000)).knob({
+			"width": dynamics_knob_width,
+			"height": dynamics_knob_height,
+			"min": 0,
+			"max": 1000,
+			"step": 1,
+			"change": function(v) { bus.Comp.attack.value = v / 1000; }
 		});
 
-		$("#master-comp-release > input").knob({
-			"width": master_knob_width,
-			"min": this.Bus.Comp.release.minValue,
-			"max": this.Bus.Comp.release.maxValue,
-			"value": this.Bus.Comp.release.value,
-			"change": function(v) { this.Bus.Comp.release.value = v; }
+		$("#master-comp-release > input").val(bus.Comp.release.value * 1000).knob({
+			"width": dynamics_knob_width,
+			"height": dynamics_knob_height,
+			"min": 0,
+			"max": 1000,
+			"step": 1,
+			"change": function(v) { bus.Comp.release.value = v / 1000; }
 		});
 
 		// poly
