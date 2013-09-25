@@ -97,19 +97,19 @@ Engine = function(context) {
 				switch (sequence[i].what) {
 					case DrumSound.BD:
 						$($("#drummachine-sequencer-bd > .note")[sequence[i].when - 1]).data("on", sequence[i].when);
-						$($("#drummachine-sequencer-bd > .note")[sequence[i].when - 1]).css("background-color", "red");
+						$($("#drummachine-sequencer-bd > .note")[sequence[i].when - 1]).css("background-color", ColorRed);
 						break;
 					case DrumSound.SD:
 						$($("#drummachine-sequencer-sd > .note")[sequence[i].when - 1]).data("on", sequence[i].when);
-						$($("#drummachine-sequencer-sd > .note")[sequence[i].when - 1]).css("background-color", "red");
+						$($("#drummachine-sequencer-sd > .note")[sequence[i].when - 1]).css("background-color", ColorRed);
 						break;
 					case DrumSound.CH:
 						$($("#drummachine-sequencer-ch > .note")[sequence[i].when - 1]).data("on", sequence[i].when);
-						$($("#drummachine-sequencer-ch > .note")[sequence[i].when - 1]).css("background-color", "red");
+						$($("#drummachine-sequencer-ch > .note")[sequence[i].when - 1]).css("background-color", ColorRed);
 						break;
 					case DrumSound.OH:
 						$($("#drummachine-sequencer-oh > .note")[sequence[i].when - 1]).data("on", sequence[i].when);
-						$($("#drummachine-sequencer-oh > .note")[sequence[i].when - 1]).css("background-color", "red");
+						$($("#drummachine-sequencer-oh > .note")[sequence[i].when - 1]).css("background-color", ColorRed);
 						break;
 					default:
 						console.log("Unexpected drum sound: " + sequence[i].what.toString());
@@ -415,24 +415,24 @@ Engine = function(context) {
 	};
 
 	for (var i = 0; i < 32; i++) {
-		$('<button class="note"></button>').data("note", self.DrumMachine.CH).appendTo($("#drummachine-sequencer-oh"));
-		$('<button class="note"></button>').data("note", self.DrumMachine.CH).appendTo($("#drummachine-sequencer-ch"));
-		$('<button class="note"></button>').data("note", self.DrumMachine.SD).appendTo($("#drummachine-sequencer-sd"));
-		$('<button class="note"></button>').data("note", self.DrumMachine.BD).appendTo($("#drummachine-sequencer-bd"));
+		$('<span class="note"></span>').data("note", self.DrumMachine.CH).appendTo($("#drummachine-sequencer-oh"));
+		$('<span class="note"></span>').data("note", self.DrumMachine.CH).appendTo($("#drummachine-sequencer-ch"));
+		$('<span class="note"></span>').data("note", self.DrumMachine.SD).appendTo($("#drummachine-sequencer-sd"));
+		$('<span class="note"></span>').data("note", self.DrumMachine.BD).appendTo($("#drummachine-sequencer-bd"));
 
-		$('<button class="note"></button>').data("note", new self.Poly.Note("B", 0, 0)).appendTo($("#poly-lane-b"));
-		$('<button class="note"></button>').data("note", new self.Poly.Note("A#", 0, 1)).appendTo($("#poly-lane-as"));
-		$('<button class="note"></button>').data("note", new self.Poly.Note("A", 0, 2)).appendTo($("#poly-lane-a"));
-		$('<button class="note"></button>').data("note", new self.Poly.Note("G#", 0, 3)).appendTo($("#poly-lane-gs"));
-		$('<button class="note"></button>').data("note", new self.Poly.Note("G", 0, 4)).appendTo($("#poly-lane-g"));
-		$('<button class="note"></button>').data("note", new self.Poly.Note("F#", 0, 5)).appendTo($("#poly-lane-fs"));
-		$('<button class="note"></button>').data("note", new self.Poly.Note("F", 0, 6)).appendTo($("#poly-lane-f"));
-		$('<button class="note"></button>').data("note", new self.Poly.Note("E", 0, 7)).appendTo($("#poly-lane-e"));
-		$('<button class="note"></button>').data("note", new self.Poly.Note("E", 1, 8)).appendTo($("#poly-lane-e2"));
-		$('<button class="note"></button>').data("note", new self.Poly.Note("D#", 0, 9)).appendTo($("#poly-lane-ds"));
-		$('<button class="note"></button>').data("note", new self.Poly.Note("D", 0, 10)).appendTo($("#poly-lane-d"));
-		$('<button class="note"></button>').data("note", new self.Poly.Note("C#", 0, 11)).appendTo($("#poly-lane-cs"));
-		$('<button class="note"></button>').data("note", new self.Poly.Note("C", 0, 12)).appendTo($("#poly-lane-c"));
+		$('<span class="note"></span>').data("note", new self.Poly.Note("B", 0, 0)).appendTo($("#poly-lane-b"));
+		$('<span class="note"></span>').data("note", new self.Poly.Note("A#", 0, 1)).appendTo($("#poly-lane-as"));
+		$('<span class="note"></span>').data("note", new self.Poly.Note("A", 0, 2)).appendTo($("#poly-lane-a"));
+		$('<span class="note"></span>').data("note", new self.Poly.Note("G#", 0, 3)).appendTo($("#poly-lane-gs"));
+		$('<span class="note"></span>').data("note", new self.Poly.Note("G", 0, 4)).appendTo($("#poly-lane-g"));
+		$('<span class="note"></span>').data("note", new self.Poly.Note("F#", 0, 5)).appendTo($("#poly-lane-fs"));
+		$('<span class="note"></span>').data("note", new self.Poly.Note("F", 0, 6)).appendTo($("#poly-lane-f"));
+		$('<span class="note"></span>').data("note", new self.Poly.Note("E", 0, 7)).appendTo($("#poly-lane-e"));
+		$('<span class="note"></span>').data("note", new self.Poly.Note("E", 1, 8)).appendTo($("#poly-lane-e2"));
+		$('<span class="note"></span>').data("note", new self.Poly.Note("D#", 0, 9)).appendTo($("#poly-lane-ds"));
+		$('<span class="note"></span>').data("note", new self.Poly.Note("D", 0, 10)).appendTo($("#poly-lane-d"));
+		$('<span class="note"></span>').data("note", new self.Poly.Note("C#", 0, 11)).appendTo($("#poly-lane-cs"));
+		$('<span class="note"></span>').data("note", new self.Poly.Note("C", 0, 12)).appendTo($("#poly-lane-c"));
 
 		$('<input id="bass-' + (i + 1) + '" value="off" class="note">').data("note", new self.Bass.Note("bass-" + (i + 1))).appendTo($("#bass-sequencer-lane"));
 	}
@@ -465,8 +465,8 @@ Engine = function(context) {
 
 	this.SetupUI = function(bus, drummachine, poly) {
 		var master_knob_width = 50;
-		var bass_note_knob_height = 50;
-		var bass_note_knob_width = 50;
+		var bass_note_knob_height = 25;
+		var bass_note_knob_width = 25;
 		var drum_control_knob_width = 50;
 		var poly_control_knob_width = 50;
 		var poly_control_knob_height = 50;
@@ -541,6 +541,10 @@ Engine = function(context) {
 			"height": poly_control_knob_height,
 			"min": 0,
 			"max": 100,
+			"fgColor": "#FFFFFF",
+			"bgColor": "rgb(200,200,200)",
+			"inputColor": "#FFFFFF",
+			"font": "monospace",
 			"value": 1,
 			"step": 1, // approx 1 ms
 			"change": function(v) { self.Poly.Attack = v / 1000; }
@@ -551,6 +555,10 @@ Engine = function(context) {
 			"height": poly_control_knob_height,
 			"min": 0,
 			"max": 1000,
+			"fgColor": "#FFFFFF",
+			"bgColor": "rgb(200,200,200)",
+			"inputColor": "#FFFFFF",
+			"font": "monospace",
 			"step": 10, // approx 10 ms
 			"change": function(v) { self.Poly.Release = v / 1000; }
 		});
@@ -560,6 +568,10 @@ Engine = function(context) {
 			"height": poly_control_knob_height,
 			"min": 100,
 			"max": 10000,
+			"fgColor": "#FFFFFF",
+			"bgColor": "rgb(200,200,200)",
+			"inputColor": "#FFFFFF",
+			"font": "monospace",
 			"step": 10, 
 			"change": function(v) { self.Poly.LP.frequency.value = v; }
 		});
@@ -569,6 +581,10 @@ Engine = function(context) {
 			"height": poly_control_knob_height,
 			"min": 0,
 			"max": 500,
+			"fgColor": "#FFFFFF",
+			"bgColor": "rgb(200,200,200)",
+			"inputColor": "#FFFFFF",
+			"font": "monospace",
 			"step": 1, 
 			"change": function(v) { self.Poly.LP.frequency.value = v / 100; }
 		});

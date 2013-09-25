@@ -2,8 +2,8 @@
 	<head>
 		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 
-		<script src="/js/seqwww.js"></script>
 		<script src="/js/knob.js"></script>
+		<script src="/js/seqwww.js"></script>
 		<script type="text/javascript">
 			(function() {
 			 var config = {
@@ -115,6 +115,9 @@ var h=document.getElementsByTagName("html")[0];h.className+=" wf-loading";var t=
 
 		<div id="instruments">
 			<div id="drummachine">
+				<div id="drummachine-controls">
+					<span id="drummachine-name">r-878</span>
+				</div>
 				<div class="drummachine-lane" id="drummachine-sequencer-oh">
 					<span class="drummachine-sequencer-label">OH</span> 
 				</div>
@@ -133,14 +136,14 @@ var h=document.getElementsByTagName("html")[0];h.className+=" wf-loading";var t=
 
 			<div id="poly">
 				<div id="poly-controls">
+					<div id="poly-name">blue planet</div>
 					<div>
-						<span><label><input id="poly-env-attack" type="text">attack</label></span>
-						<span><label><input id="poly-env-release" type="text">release</label></span>
+						<label class="poly-control"><input id="poly-env-attack" type="text">attack</label>
+						<label class="poly-control"><input id="poly-env-release" type="text">release</label>
 					</div>
-
-					<div>
-						<span class="hcontrol"><label><input id="poly-filter-freq" type="text">cutoff</label></span>
-						<span class="hcontrol"><label><input id="poly-filter-q" type="text">resonance</label></span>
+					<div style="margin-top: 2em;">
+						<label class="poly-control"><input id="poly-filter-freq" type="text">cutoff</label>
+						<label class="poly-control"><input id="poly-filter-q" type="text">resonance</label>
 					</div>
 				</div>
 				<div id="poly-sequencer">
