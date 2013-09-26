@@ -133,3 +133,13 @@ body {
 #sequencer-stop {
 	color: rgb(250, 250, 250);
 }
+
+#master-eq {
+	width: 50%;
+	float: left;
+}
+
+#master-comp {
+	width: 50%;
+	float: right;
+}

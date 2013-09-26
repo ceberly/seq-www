@@ -225,23 +225,34 @@ var h=document.getElementsByTagName("html")[0];h.className+=" wf-loading";var t=
 					<span id="sequencer-start">PLAY</span>
 					<span id="sequencer-stop">STOP</span>
 				</div>
+				<div>
+					<label id="sequencer-tempo"><input type="text">tempo</label>
+				</div>
 			</div>
-			<div>
+			<div id="master-eq">
 				<div>EQ</div>
-				<div style="margin-top: 1em;">
+				<div>
 					<label id="master-eq-low"><input type="text">HPF</label>
+				</div>
+				<div>
 					<label id="master-eq-mid"><input type="text">MID</label>
+
+				</div>
+				<div>
 					<label id="master-eq-high"><input type="text">LPF</label>
 				</div>
 			</div>
-			<div style="margin-top: 2em;">
+			<div id="master-comp">
 				<div>Comp</div>
-				<div style="margin-top: 1em;">
+				<div>
 					<label id="master-comp-ratio"><input type="text">ratio</label>
-					<label id="master-comp-attack"><input type="text">attack</label>
-					<label id="master-comp-release"><input type="text">release</label>
 				</div>
-			</div>
+				<div>
+					<label id="master-comp-attack"><input type="text">attack</label>
+					<div>
+						<label id="master-comp-release"><input type="text">release</label>
+					</div>
+				</div>
 		</div>
 	</body>
 </html>

@@ -49,6 +49,7 @@ function freqFromCanonical(canonical) {
 
 Engine = function(context) {
 	var self = this;
+	self.Tempo = 120;
 
 	this.Bus = {
 		Comp: context.createDynamicsCompressor(),
@@ -135,10 +136,10 @@ Engine = function(context) {
 	bdOsc2.connect(bdLP);
 	bdOsc2.start(0);
 
-	this.DrumMachine.BD = { Gain: 1 };
-	this.DrumMachine.SD = { Gain: 1 };
-	this.DrumMachine.CH = { Gain: 1 };
-	this.DrumMachine.OH = { Gain: 1 };
+	this.DrumMachine.BD = { Gain: .25 };
+	this.DrumMachine.SD = { Gain: .25 };
+	this.DrumMachine.CH = { Gain: .25 };
+	this.DrumMachine.OH = { Gain: .25 };
 
 	var bd = this.DrumMachine.BD;
 	this.DrumMachine.BD.Trigger = function(at) {
@@ -201,13 +202,13 @@ Engine = function(context) {
 
 	var sd = this.DrumMachine.SD;
 	this.DrumMachine.SD.Trigger = function(at) {
-			sdGate.gain.setTargetAtTime(sd.Gain - .5, at, 0);
+			sdGate.gain.setTargetAtTime(sd.Gain * .5, at, 0);
 			sdGate.gain.setTargetAtTime(0, at + .03, .03);
 
-			sdOsc1Env.gain.setTargetAtTime(sd.Gain - .75, at, 0);
+			sdOsc1Env.gain.setTargetAtTime(sd.Gain * .25, at, 0);
 			sdOsc1Env.gain.setTargetAtTime(0, at + .03, .03);
 
-			sdOsc2Env.gain.setTargetAtTime(sd.Gain - .75, at, 0);
+			sdOsc2Env.gain.setTargetAtTime(sd.Gain * .25, at, 0);
 			sdOsc2Env.gain.setTargetAtTime(0, at + .03, .03);
 	};
 
@@ -353,7 +354,7 @@ Engine = function(context) {
 	this.Poly.MasterGain.connect(bus.Input);
 
 	this.Poly.LP.connect(this.Poly.MasterGain);
-	this.Poly.LP.frequency.value = 2500;
+	this.Poly.LP.frequency.value = 1000;
 	this.Poly.LP.Q.value = 0;
 
 	this.Poly.Osc1Gain.connect(this.Poly.LP);
@@ -393,8 +394,8 @@ Engine = function(context) {
 		voices[voice].osc2.frequency.value = frequency * Math.pow(2, octave);
 
 		this.Trigger = function(at) {
-			voices[voice].osc1Gate.gain.setTargetAtTime(.5, at, self.Poly.Attack);
-			voices[voice].osc2Gate.gain.setTargetAtTime(.5, at, self.Poly.Attack);
+			voices[voice].osc1Gate.gain.setTargetAtTime(poly.MasterGain.gain.value * .5, at, self.Poly.Attack);
+			voices[voice].osc2Gate.gain.setTargetAtTime(poly.MasterGain.gain.value * .5, at, self.Poly.Attack);
 
 			voices[voice].osc1Gate.gain.setTargetAtTime(0, at + self.Poly.Attack + self.Poly.Decay, self.Poly.Release);
 			voices[voice].osc2Gate.gain.setTargetAtTime(0, at + self.Poly.Attack + self.Poly.Decay, self.Poly.Release);
@@ -433,11 +434,11 @@ Engine = function(context) {
 		$('<input id="bass-' + (i + 1) + '" value="off" class="note">').data("note", new self.Bass.Note("bass-" + (i + 1))).appendTo($("#bass-sequencer-lane"));
 	}
 
-	this.LoadSequence = function(tempo) {
+	this.LoadSequence = function() {
 		// assume 8th notes for the time being.
-		var tickTime = 60 / tempo / 4;
 		var t = false;
 		$("#sequencer-start").click(function() {
+			var tickTime = 60 / self.Tempo / 4;
 			var now = context.currentTime;
 			var notes = $(".note");
 			for (var i = 0; i < notes.length; i++) {
@@ -470,9 +471,25 @@ Engine = function(context) {
 		var poly_control_knob_width = 50;
 		var poly_control_knob_height = 50;
 
+		$("#sequencer-tempo > input").val(self.Tempo).knob({
+			"width": master_knob_width,
+			"height": master_knob_height,
+			"fgColor": "#FFFFFF",
+			"bgColor": "rgb(200,200,200)",
+			"inputColor": "#FFFFFF",
+			"font": "monospace",
+			"min": 50,
+			"max": 200,
+			"change": function(v) { self.Tempo = v; }
+		});
+
 		$("#master-eq-high > input").val(bus.LowPass.frequency.value).knob({
 			"width": master_knob_width,
 			"height": master_knob_height,
+			"fgColor": "#FFFFFF",
+			"bgColor": "rgb(200,200,200)",
+			"inputColor": "#FFFFFF",
+			"font": "monospace",
 			"min": 5000,
 			"max": 20000,
 			"change": function(v) { bus.LowPass.frequency.value = v; }
@@ -482,6 +499,10 @@ Engine = function(context) {
 			"width": master_knob_width,
 			"height": master_knob_height,
 			"min": 0,
+			"fgColor": "#FFFFFF",
+			"bgColor": "rgb(200,200,200)",
+			"inputColor": "#FFFFFF",
+			"font": "monospace",
 			"max": 1000,
 			"change": function(v) { bus.HighPass.frequency.value = v; }
 		});
@@ -491,6 +512,10 @@ Engine = function(context) {
 			"height": master_knob_height,
 			"min": -10,
 			"max": 10,
+			"fgColor": "#FFFFFF",
+			"bgColor": "rgb(200,200,200)",
+			"inputColor": "#FFFFFF",
+			"font": "monospace",
 			"step": 1,
 			"change": function(v) { bus.Peaking.gain.value = v; }
 		});
@@ -500,6 +525,10 @@ Engine = function(context) {
 			"height": dynamics_knob_height,
 			"min": bus.Comp.ratio.minValue,
 			"max": bus.Comp.ratio.maxValue,
+			"fgColor": "#FFFFFF",
+			"bgColor": "rgb(200,200,200)",
+			"inputColor": "#FFFFFF",
+			"font": "monospace",
 			"value": this.Bus.Comp.ratio.value,
 			"change": function(v) { bus.Comp.ratio.value = v; }
 		});
@@ -508,6 +537,11 @@ Engine = function(context) {
 			"width": dynamics_knob_width,
 			"height": dynamics_knob_height,
 			"min": 0,
+			"fgColor": "white",
+			"fgColor": "#FFFFFF",
+			"bgColor": "rgb(200,200,200)",
+			"inputColor": "#FFFFFF",
+			"font": "monospace",
 			"max": 1000,
 			"step": 1,
 			"change": function(v) { bus.Comp.attack.value = v / 1000; }
@@ -518,6 +552,10 @@ Engine = function(context) {
 			"height": dynamics_knob_height,
 			"min": 0,
 			"max": 1000,
+			"fgColor": "#FFFFFF",
+			"bgColor": "rgb(200,200,200)",
+			"inputColor": "#FFFFFF",
+			"font": "monospace",
 			"step": 1,
 			"change": function(v) { bus.Comp.release.value = v / 1000; }
 		});
