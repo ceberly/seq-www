@@ -121,7 +121,25 @@
 		<div id="instruments">
 			<div id="drummachine">
 				<table id="drummachine-controls">
-					<tr><td></td></tr>
+					<tr>
+						<td colspan="2" id="drummachine-name" style="text-align: right;">drum-78</td>
+					</tr>
+					<tr>
+						<td>bass</td>
+						<td>snare</td>
+					</tr>
+					<tr>
+						<td><input id="drummachine-bd-gain" type="text"></td>
+						<td><input id="drummachine-sd-gain" type="text"></td>
+					</tr>
+					<tr>
+						<td>closed hh</td>
+						<td>open hh</td>
+					</tr>
+					<tr>
+						<td><input id="drummachine-ch-gain" type="text"></td>
+						<td><input id="drummachine-oh-gain" type="text"></td>
+					</tr>
 				</table>
 				<table id="drummachine-sequencer">
 					<tr class="drummachine-lane" id="drummachine-sequencer-oh">
@@ -144,19 +162,39 @@
 			<div id="poly">
 				<table id="poly-controls">
 					<tr>
-						<td><label class="poly-control"><input id="poly-osc-mix" type="text">osc mix</label></td>
+						<td colspan="2" id="poly-name" style="text-align: right;">blue planet</td>
 					</tr>
 					<tr>
-						<td><label class="poly-control"><input id="poly-env-attack" type="text">attack</label></td>
-						<td><label class="poly-control"><input id="poly-env-decay" type="text">decay</label></td>
+						<td>&nbsp;</td>
+						<td>osc mix</td>
 					</tr>
 					<tr>
-						<td><label class="poly-control"><input id="poly-env-sustain" type="text">sustain</label></td>
-						<td><label class="poly-control"><input id="poly-env-release" type="text">release</label></td>
+						<td>&nbsp;</td>
+						<td><input id="poly-osc-mix" type="text"></td>
 					</tr>
 					<tr>
-						<td><label class="poly-control"><input id="poly-filter-freq" type="text">cutoff</label></td>
-						<td><label class="poly-control"><input id="poly-filter-q" type="text">resonance</label></td>
+						<td>attack</td>
+						<td>decay</td>
+					</tr>
+					<tr>
+						<td><input id="poly-env-attack" type="text"></td>
+						<td><input id="poly-env-decay" type="text"></td>
+					</tr>
+					<tr>
+						<td>sustain</td>
+						<td>release</td>
+					</tr>
+					<tr>
+						<td><input id="poly-env-sustain" type="text"></td>
+						<td><input id="poly-env-release" type="text"></td>
+					</tr>
+					<tr>
+						<td>cutoff</td>
+						<td>resonance</td>
+					</tr>
+					<tr>
+						<td><input id="poly-filter-freq" type="text"></td>
+						<td><input id="poly-filter-q" type="text"></td>
 					</tr>
 				</table>
 				<table id="poly-sequencer">
@@ -204,12 +242,23 @@
 			<div id="bass">
 				<table id="bass-controls">
 					<tr>
-						<td><label><input id="bass-env-attack" type="text">attack</label></td>
-						<td><label><input id="bass-env-decay" type="text">decay</label></td>
+						<td colspan="2" id="bass-name" style="text-align: right;">baseline</td>
 					</tr>
 					<tr>
-						<td><label><input id="bass-filter-freq" type="text">cutoff</label></td>
-						<td><label><input id="bass-filter-q" type="text">resonance</label></td>
+						<td>attack</td>
+						<td>decay</td>
+					</tr>
+					<tr>
+						<td><input id="bass-env-attack" type="text"></td>
+						<td><input id="bass-env-decay" type="text"></td>
+					</tr>
+					<tr>
+						<td>cutoff</td>
+						<td>resonance</td>
+					</tr>
+					<tr>
+						<td><input id="bass-filter-freq" type="text"></td>
+						<td><input id="bass-filter-q" type="text"></td>
 					</tr>
 				</table>
 				<table id="bass-sequencer">
@@ -221,41 +270,66 @@
 		<div id="master">
 			<table id="transport">
 				<tr>
-					<td colspan="2">SEQ-WWW</td>
+					<td colspan="2" style="text-align: right;">SEQ-WWW</td>
 				</tr>
+
 				<tr>
 					<td id="sequencer-start">PLAY</td>
 					<td id="sequencer-stop">STOP</td>
 				</tr>
 				<tr>
-					<td colspan="2"><label id="sequencer-tempo"><input type="text">tempo</label></td>
+					<td colspan="2" style="font-size: .75em;">tempo</td>
 				</tr>
+				<tr>
+					<td colspan="2"><input id="sequencer-tempo" type="text"></td>
+				</tr>
+
 			</table>
 			<table id="mix">
 				<tr>
-					<td>Mix</td>
-					<td>EQ</td>
-					<td>Comp</td>
+					<td><u>Mix</u></td>
+					<td><u>EQ</u></td>
+					<td><u>Compressor</u></td>
 				</tr>
 				<tr>
 					<td>drums</td>
-					<td><label id="master-eq-low"><input type="text">HPF</label></td>
-					<td><label id="master-comp-ratio"><input type="text">ratio</label></td>
+					<td>highpass</td>
+					<td>ratio</td>
+				</tr>
+				<tr>
+					<td><input id="drummachine-gain" type="text"></td>
+					<td><input id="master-eq-low" type="text"></td>
+					<td><input id="master-comp-ratio" type="text"></td>
 				</tr>
 				<tr>
 					<td>poly</td>
-					<td><label id="master-eq-mid"><input type="text">MID</label></td>
-					<td><label id="master-comp-attack"><input type="text">attack</label></td>
+					<td>midrange</td>
+					<td>attack</td>
+				</tr>
+				<tr>
+					<td><input id="poly-gain" type="text"></td>
+					<td><input id="master-eq-mid" type="text"></td>
+					<td><input id="master-comp-attack" type="text"></td>
 				</tr>
 				<tr>
 					<td>bass</td>
-					<td><label id="master-eq-high"><input type="text">LPF</label></td>
-					<td><label id="master-comp-release"><input type="text">release</label></td>
+					<td>lowpass</td>
+					<td>release</td>
+				</tr>
+				<tr>
+					<td><input id="bass-gain" type="text"></td>
+					<td><input id="master-eq-high" type="text"></td>
+					<td><input id="master-comp-release" type="text"></td>
 				</tr>
 				<tr>
 					<td>&nbsp;</td>
 					<td>&nbsp;</td>
-					<td><label id="master-comp-threshold"><input type="text">threshold</label></td>
+					<td>threshold</td>
+				</tr>
+				<tr>
+					<td>&nbsp;</td>
+					<td>&nbsp;</td>
+					<td><input id="master-comp-threshold" type="text"></td>
 				</tr>
 			</table>
 		</body>

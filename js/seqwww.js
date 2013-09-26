@@ -122,10 +122,20 @@ Engine = function(context) {
 		drummachine.CH.Off();
 	}
 
+	this.DrumMachine.BD = { Gain: context.createGain() };
+	this.DrumMachine.SD = { Gain: context.createGain() };
+	this.DrumMachine.CH = { Gain: context.createGain() };
+	this.DrumMachine.OH = { Gain: context.createGain() };
+
+	this.DrumMachine.BD.Gain.connect(this.DrumMachine.MasterGain);
+	this.DrumMachine.SD.Gain.connect(this.DrumMachine.MasterGain);
+	this.DrumMachine.OH.Gain.connect(this.DrumMachine.MasterGain);
+	this.DrumMachine.CH.Gain.connect(this.DrumMachine.MasterGain);
+
 	//BD
 	var bdEnv = context.createGain();
 	bdEnv.gain.value = 0;
-	bdEnv.connect(this.DrumMachine.MasterGain);
+	bdEnv.connect(this.DrumMachine.BD.Gain);
 
 	var bdLP = context.createBiquadFilter();
 	bdLP.frequency.value = 100;
@@ -143,14 +153,8 @@ Engine = function(context) {
 	bdOsc2.connect(bdLP);
 	bdOsc2.start(0);
 
-	this.DrumMachine.BD = { Gain: .25 };
-	this.DrumMachine.SD = { Gain: .25 };
-	this.DrumMachine.CH = { Gain: .25 };
-	this.DrumMachine.OH = { Gain: .25 };
-
-	var bd = this.DrumMachine.BD;
 	this.DrumMachine.BD.Trigger = function(at) {
-		bdEnv.gain.setTargetAtTime(bd.Gain, at, .01);
+		bdEnv.gain.setTargetAtTime(1, at, .01);
 		bdEnv.gain.setTargetAtTime(0, at + .05, .03);
 	};
 
@@ -162,18 +166,18 @@ Engine = function(context) {
 	//SD
 	var sdGate = context.createGain();
 	sdGate.gain.value = 0;
-	sdGate.connect(this.DrumMachine.MasterGain);
+	sdGate.connect(this.DrumMachine.SD.Gain);
 
 	var sdWNEnv = context.createGain();
 	sdWNEnv.connect(sdGate);
 	sdWNEnv.gain.value = 0;
 
 	var sdOsc1Env = context.createGain();
-	sdOsc1Env.connect(this.DrumMachine.MasterGain);
+	sdOsc1Env.connect(this.DrumMachine.SD.Gain);
 	sdOsc1Env.gain.value = 0;
 
 	var sdOsc2Env = context.createGain();
-	sdOsc2Env.connect(this.DrumMachine.MasterGain);
+	sdOsc2Env.connect(this.DrumMachine.SD.Gain);
 	sdOsc2Env.gain.value = 0;
 
 	var sdHP = context.createBiquadFilter();
@@ -214,13 +218,13 @@ Engine = function(context) {
 
 	var sd = this.DrumMachine.SD;
 	this.DrumMachine.SD.Trigger = function(at) {
-		sdGate.gain.setTargetAtTime(sd.Gain * .5, at, 0);
+		sdGate.gain.setTargetAtTime(.5, at, 0);
 		sdGate.gain.setTargetAtTime(0, at + .03, .03);
 
-		sdOsc1Env.gain.setTargetAtTime(sd.Gain * .25, at, 0);
+		sdOsc1Env.gain.setTargetAtTime(.25, at, 0);
 		sdOsc1Env.gain.setTargetAtTime(0, at + .03, .03);
 
-		sdOsc2Env.gain.setTargetAtTime(sd.Gain * .25, at, 0);
+		sdOsc2Env.gain.setTargetAtTime(.25, at, 0);
 		sdOsc2Env.gain.setTargetAtTime(0, at + .03, .03);
 	};
 
@@ -236,7 +240,7 @@ Engine = function(context) {
 
 	//CH
 	var chHP = context.createBiquadFilter();
-	chHP.connect(this.DrumMachine.MasterGain);
+	chHP.connect(this.DrumMachine.CH.Gain);
 	chHP.type = "highpass";
 	chHP.frequency.value = 10000;
 
@@ -311,13 +315,13 @@ Engine = function(context) {
 
 	var ch = this.DrumMachine.CH;
 	this.DrumMachine.CH.Trigger = function(at) {
-		chHGain1.gain.setTargetAtTime(ch.Gain / 3, at, 0);
+		chHGain1.gain.setTargetAtTime(1 / 3, at, 0);
 		chHGain1.gain.setTargetAtTime(0, at + .01, .01);
 
-		chHGain2.gain.setTargetAtTime(ch.Gain / 3, at, 0);
+		chHGain2.gain.setTargetAtTime(1 / 3, at, 0);
 		chHGain2.gain.setTargetAtTime(0, at + .02, .01);
 
-		chLBGain.gain.setTargetAtTime(ch.Gain / 3, at, 0);
+		chLBGain.gain.setTargetAtTime(1 / 3, at, 0);
 		chLBGain.gain.setTargetAtTime(0, at + .02, .01);
 	};
 
@@ -538,13 +542,13 @@ Engine = function(context) {
 	var master_knob_height = 50;
 	var dynamics_knob_width = 50;
 	var dynamics_knob_height = 50;
-	var bass_note_knob_height = 40;
-	var bass_note_knob_width = 40;
+	var bass_note_knob_height = 45;
+	var bass_note_knob_width = 45;
 	var drum_control_knob_width = 50;
 	var poly_control_knob_width = 50;
 	var poly_control_knob_height = 50;
 
-	$("#sequencer-tempo > input").val(self.Tempo).knob({
+	$("#sequencer-tempo").val(self.Tempo).knob({
 		"width": master_knob_width,
 		"height": master_knob_height,
 		"fgColor": "#FFFFFF",
@@ -556,7 +560,7 @@ Engine = function(context) {
 		"change": function(v) { self.Tempo = v; }
 	});
 
-	$("#master-eq-high > input").val(bus.LowPass.frequency.value).knob({
+	$("#master-eq-high").val(bus.LowPass.frequency.value).knob({
 		"width": master_knob_width,
 		"height": master_knob_height,
 		"fgColor": "#FFFFFF",
@@ -568,7 +572,7 @@ Engine = function(context) {
 		"change": function(v) { bus.LowPass.frequency.value = v; }
 	});
 
-	$("#master-eq-low > input").val(bus.HighPass.frequency.value).knob({
+	$("#master-eq-low").val(bus.HighPass.frequency.value).knob({
 		"width": master_knob_width,
 		"height": master_knob_height,
 		"min": 0,
@@ -580,7 +584,7 @@ Engine = function(context) {
 		"change": function(v) { bus.HighPass.frequency.value = v; }
 	});
 
-	$("#master-eq-mid > input").val(bus.Peaking.gain.value).knob({
+	$("#master-eq-mid").val(bus.Peaking.gain.value).knob({
 		"width": master_knob_width,
 		"height": master_knob_height,
 		"min": -10,
@@ -593,9 +597,9 @@ Engine = function(context) {
 		"change": function(v) { bus.Peaking.gain.value = v; }
 	});
 
-	$("#master-comp-ratio > input").val(bus.Comp.ratio.value).knob({
-		"width": dynamics_knob_width,
-		"height": dynamics_knob_height,
+	$("#master-comp-ratio").val(bus.Comp.ratio.value).knob({
+		"width": master_knob_width,
+		"height": master_knob_height,
 		"min": bus.Comp.ratio.minValue,
 		"max": bus.Comp.ratio.maxValue,
 		"fgColor": "#FFFFFF",
@@ -605,7 +609,7 @@ Engine = function(context) {
 		"change": function(v) { bus.Comp.ratio.value = v; }
 	});
 
-	$("#master-comp-threshold> input").val(bus.Comp.threshold.value).knob({
+	$("#master-comp-threshold").val(bus.Comp.threshold.value).knob({
 		"width": dynamics_knob_width,
 		"height": dynamics_knob_height,
 		"min": bus.Comp.threshold.minValue,
@@ -617,7 +621,7 @@ Engine = function(context) {
 		"change": function(v) { bus.Comp.threshold.value = v; }
 	});
 
-	$("#master-comp-attack > input").val(parseInt(bus.Comp.attack.value * 1000)).knob({
+	$("#master-comp-attack").val(parseInt(bus.Comp.attack.value * 1000)).knob({
 		"width": dynamics_knob_width,
 		"height": dynamics_knob_height,
 		"min": 0,
@@ -631,7 +635,7 @@ Engine = function(context) {
 		"change": function(v) { bus.Comp.attack.value = v / 1000; }
 	});
 
-	$("#master-comp-release > input").val(bus.Comp.release.value * 1000).knob({
+	$("#master-comp-release").val(bus.Comp.release.value * 1000).knob({
 		"width": dynamics_knob_width,
 		"height": dynamics_knob_height,
 		"min": 0,
@@ -642,6 +646,55 @@ Engine = function(context) {
 		"font": "monospace",
 		"step": 1,
 		"change": function(v) { bus.Comp.release.value = v / 1000; }
+	});
+
+	// drummachine
+	$("#drummachine-bd-gain").val(self.DrumMachine.BD.Gain.gain.value * 100).knob({
+		"width": poly_control_knob_width,
+		"height": poly_control_knob_height,
+		"min": 0,
+		"max": 100,
+		"fgColor": "orange",
+		"bgColor": "rgb(200,200,200)",
+		"inputColor": "white",
+		"font": "monospace",
+		"change": function(v) { self.DrumMachine.BD.Gain.gain.value = v / 100; }
+	});
+
+	$("#drummachine-sd-gain").val(self.DrumMachine.SD.Gain.gain.value * 100).knob({
+		"width": poly_control_knob_width,
+		"height": poly_control_knob_height,
+		"min": 0,
+		"max": 100,
+		"fgColor": "orange",
+		"bgColor": "rgb(200,200,200)",
+		"inputColor": "white",
+		"font": "monospace",
+		"change": function(v) { self.DrumMachine.SD.Gain.gain.value = v / 100; }
+	});
+
+	$("#drummachine-oh-gain").val(self.DrumMachine.OH.Gain.gain.value * 100).knob({
+		"width": poly_control_knob_width,
+		"height": poly_control_knob_height,
+		"min": 0,
+		"max": 100,
+		"fgColor": "orange",
+		"bgColor": "rgb(200,200,200)",
+		"inputColor": "white",
+		"font": "monospace",
+		"change": function(v) { self.DrumMachine.OH.Gain.gain.value = v / 100; }
+	});
+
+	$("#drummachine-ch-gain").val(self.DrumMachine.CH.Gain.gain.value * 100).knob({
+		"width": poly_control_knob_width,
+		"height": poly_control_knob_height,
+		"min": 0,
+		"max": 100,
+		"fgColor": "orange",
+		"bgColor": "rgb(200,200,200)",
+		"inputColor": "white",
+		"font": "monospace",
+		"change": function(v) { self.DrumMachine.CH.Gain.gain.value = v / 100; }
 	});
 
 	// poly
@@ -725,6 +778,45 @@ Engine = function(context) {
 		"change": function(v) { self.Poly.LP.Q.value = v; }
 	});
 
+	$("#poly-gain").val(self.Poly.MasterGain.gain.value * 100).knob({
+		"width": dynamics_knob_width,
+		"height": dynamics_knob_height,
+		"min": 0,
+		"max": 100,
+		"fgColor": "#FFFFFF",
+		"bgColor": "rgb(200,200,200)",
+		"inputColor": "#FFFFFF",
+		"font": "monospace",
+		"step": 1,
+		"change": function(v) { self.Poly.MasterGain.gain.value = v / 100; }
+	});
+
+	$("#drummachine-gain").val(parseInt(self.DrumMachine.MasterGain.gain.value * 100)).knob({
+		"width": dynamics_knob_width,
+		"height": dynamics_knob_height,
+		"min": 0,
+		"max": 100,
+		"fgColor": "#FFFFFF",
+		"bgColor": "rgb(200,200,200)",
+		"inputColor": "#FFFFFF",
+		"font": "monospace",
+		"step": 1,
+		"change": function(v) { self.DrumMachine.MasterGain.gain.value = v / 100; }
+	});
+
+	$("#bass-gain").val(self.Bass.Gain.gain.value * 100).knob({
+		"width": dynamics_knob_width,
+		"height": dynamics_knob_height,
+		"min": 0,
+		"max": 100,
+		"fgColor": "#FFFFFF",
+		"bgColor": "rgb(200,200,200)",
+		"inputColor": "#FFFFFF",
+		"font": "monospace",
+		"step": 1,
+		"change": function(v) { self.Bass.Gain.gain.value = v / 100; }
+	});
+
 	$("#poly-osc-mix").val(100 - parseInt(100 * self.Poly.Osc1Gain.gain.value)).knob({
 		"width": poly_control_knob_width,
 		"height": poly_control_knob_height,
@@ -745,11 +837,10 @@ Engine = function(context) {
 			"height": bass_note_knob_height,
 			"min": 0,
 			"max": 13,
-			"fgColor": "rgb(203, 75, 22)",
+			"fgColor": "white",
 			"bgColor": "rgb(200,200,200)",
-			"inputColor": "#FFFFFF",
-			"font": "monospace",
-			"step": 1,
+			"inputColor": "white",
+			"font": "sans-serif",
 			"draw": function() { this.$.val(bassNoteHash[this.$.val()]); }
 		});
 	}
@@ -761,8 +852,7 @@ Engine = function(context) {
 		"max": 2000,
 		"fgColor": "#FFFFFF",
 		"bgColor": "rgb(200,200,200)",
-		"inputColor": "#FFFFFF",
-		"font": "monospace",
+		"inputColor": "pink",
 		"step": 1,
 		"change": function(v) { self.Bass.Decay = v; }
 	});
@@ -774,8 +864,7 @@ Engine = function(context) {
 		"max": 200,
 		"fgColor": "#FFFFFF",
 		"bgColor": "rgb(200,200,200)",
-		"inputColor": "#FFFFFF",
-		"font": "monospace",
+		"inputColor": "pink",
 		"step": 1,
 		"change": function(v) { self.Bass.Attack = v; }
 	});
@@ -787,8 +876,7 @@ Engine = function(context) {
 		"max": 1000,
 		"fgColor": "#FFFFFF",
 		"bgColor": "rgb(200,200,200)",
-		"inputColor": "#FFFFFF",
-		"font": "monospace",
+		"inputColor": "pink",
 		"step": 1,
 		"change": function(v) { self.Bass.LP.frequency.value = v; }
 	});
@@ -800,8 +888,7 @@ Engine = function(context) {
 		"max": 50,
 		"fgColor": "#FFFFFF",
 		"bgColor": "rgb(200,200,200)",
-		"inputColor": "#FFFFFF",
-		"font": "monospace",
+		"inputColor": "pink",
 		"step": 1,
 		"change": function(v) { self.Bass.LP.Q.value = v; }
 	});
