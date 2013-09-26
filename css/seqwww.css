@@ -1,3 +1,12 @@
+a {
+	text-decoration: none;
+	color: white;
+}
+
+p {
+	font-size: .75em;
+}
+
 body {
 	width: 95%;
 	height: 90%;
