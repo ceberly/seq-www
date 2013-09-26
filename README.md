@@ -9,7 +9,7 @@ Please feel free to do whatever you want with this code, though it is governed b
 
 seq-www uses https://github.com/aterrien/jQuery-Knob for dial rendering. Please consult the relevant license information there as well.
 
-Here are some useful resources for understanding the web API and the style of synthesis that I tried to do here:
+Here are some useful resources for understanding the web audio API and the style of synthesis that I tried to do here:
 
 https://dvcs.w3.org/hg/audio/raw-file/tip/webaudio/specification.html
 
