@@ -238,9 +238,18 @@ Engine = function(context) {
 		sdOsc2Env.gain.value = 0;	
 	}
 
+	var ohGate = context.createGain();
+	ohGate.gain.value = 0;
+	ohGate.connect(this.DrumMachine.OH.Gain);
+
+	var chGate = context.createGain();
+	chGate.gain.value = 0;
+	chGate.connect(this.DrumMachine.CH.Gain);
+
 	//CH
 	var chHP = context.createBiquadFilter();
-	chHP.connect(this.DrumMachine.CH.Gain);
+	chHP.connect(chGate);
+	chHP.connect(ohGate);
 	chHP.type = "highpass";
 	chHP.frequency.value = 10000;
 
@@ -314,7 +323,11 @@ Engine = function(context) {
 	chOsc6.start(0);
 
 	var ch = this.DrumMachine.CH;
+	var oh = this.DrumMachine.OH;
 	this.DrumMachine.CH.Trigger = function(at) {
+		ohGate.gain.value = 0; // silence open hat
+		chGate.gain.value = 1; // open closed hat gate 
+
 		chHGain1.gain.setTargetAtTime(1 / 3, at, 0);
 		chHGain1.gain.setTargetAtTime(0, at + .01, .01);
 
@@ -323,6 +336,20 @@ Engine = function(context) {
 
 		chLBGain.gain.setTargetAtTime(1 / 3, at, 0);
 		chLBGain.gain.setTargetAtTime(0, at + .02, .01);
+	};
+
+	this.DrumMachine.OH.Trigger = function(at) {
+		chGate.gain.value = 0; // silence closed hat
+		ohGate.gain.value = 1; // open open hat gate
+
+		chHGain1.gain.setTargetAtTime(1 / 3, at, 0);
+		chHGain1.gain.setTargetAtTime(0, at + .5, 1);
+
+		chHGain2.gain.setTargetAtTime(1 / 3, at, 0);
+		chHGain2.gain.setTargetAtTime(0, at + .5, 1);
+
+		chLBGain.gain.setTargetAtTime(1 / 3, at, 0);
+		chLBGain.gain.setTargetAtTime(0, at + .5, 1);
 	};
 
 	this.DrumMachine.CH.Off = function() {
@@ -475,7 +502,7 @@ Engine = function(context) {
 	};
 
 	for (var i = 0; i < 32; i++) {
-		$('<td class="note">&nbsp;&nbsp;</td>').data("note", self.DrumMachine.CH).appendTo($("#drummachine-sequencer-oh"));
+		$('<td class="note">&nbsp;&nbsp;</td>').data("note", self.DrumMachine.OH).appendTo($("#drummachine-sequencer-oh"));
 		$('<td class="note">&nbsp;&nbsp;</td>').data("note", self.DrumMachine.CH).appendTo($("#drummachine-sequencer-ch"));
 		$('<td class="note">&nbsp;&nbsp;</td>').data("note", self.DrumMachine.SD).appendTo($("#drummachine-sequencer-sd"));
 		$('<td class="note">&nbsp;&nbsp;</td>').data("note", self.DrumMachine.BD).appendTo($("#drummachine-sequencer-bd"));
