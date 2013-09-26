@@ -22,8 +22,6 @@ var h=document.getElementsByTagName("html")[0];h.className+=" wf-loading";var t=
 
 			engine = new Engine(context);
 
-			engine.SetupUI();
-
 			sequence = [
 			{ what: DrumSound.BD, when: 1 },
 			{ what: DrumSound.CH, when: 1 },
@@ -117,7 +115,7 @@ var h=document.getElementsByTagName("html")[0];h.className+=" wf-loading";var t=
 			engine.Poly.LoadSequence(polySequence);
 			engine.Bass.LoadSequence(bassSequence);
 
-			engine.LoadSequence(100);
+			engine.LoadSequence();
 		}
 		catch(e) {
 			document.write("<h2>Sorry, web audio is not supported by this browser</h2>");
@@ -132,7 +130,6 @@ var h=document.getElementsByTagName("html")[0];h.className+=" wf-loading";var t=
 		<div id="instruments">
 			<div id="drummachine">
 				<div id="drummachine-controls">
-					<span id="drummachine-name">r-878</span>
 				</div>
 				<div class="drummachine-lane" id="drummachine-sequencer-oh">
 					<span class="drummachine-sequencer-label">OH</span> 
@@ -152,7 +149,6 @@ var h=document.getElementsByTagName("html")[0];h.className+=" wf-loading";var t=
 
 			<div id="poly">
 				<div id="poly-controls">
-					<div id="poly-name">blue planet</div>
 					<div>
 						<label class="poly-control"><input id="poly-env-attack" type="text">attack</label>
 						<label class="poly-control"><input id="poly-env-release" type="text">release</label>
@@ -209,12 +205,15 @@ var h=document.getElementsByTagName("html")[0];h.className+=" wf-loading";var t=
 					<div>
 						<label><input id="bass-env-attack" type="text">attack</label>
 						<label><input id="bass-env-decay" type="text">decay</label>
+					</div>
+					<div>
 						<label><input id="bass-filter-freq" type="text">cutoff</label>
 						<label><input id="bass-filter-q" type="text">resonance</label>
 					</div>
 				</div>
 				<div id="bass-sequencer">
-					<div id="bass-sequencer-lane"></div>
+					<div class="bass-sequencer-lane" id="bass-sequencer-lane-1"></div>
+					<div class="bass-sequencer-lane" id="bass-sequencer-lane-2"></div>
 				</div>
 			</div>
 		</div>

@@ -303,15 +303,18 @@ Engine = function(context) {
 		LP: context.createBiquadFilter(),
 		Osc: context.createOscillator(),
 		Gain: context.createGain(),
-		Attack: .1,
-		Decay: .5,
+		Attack: 50, // ms
+		Decay: 500, // ms
 	}
 
 	var bass = this.Bass;
 
 	bass.Gain.connect(bus.Input);
-	bass.Gain.gain.value = .333333;
+	bass.Gain.gain.value = 1;
 	bass.LP.connect(this.Bass.Gain);
+
+	bass.LP.frequency.value = 500;
+	bass.LP.Q.value = 2;
 
 	var bassEnv = context.createGain();
 	bassEnv.connect(bass.LP);
@@ -325,16 +328,17 @@ Engine = function(context) {
 		this.Trigger = function(at) {
 			var frequency = freqFromCanonical($("#" + inputId).val());
 			bass.Osc.frequency.setTargetAtTime(frequency / 2, at, 0);
-			bassEnv.gain.setTargetAtTime(1, at, 0);	
-			bassEnv.gain.setTargetAtTime(0, at + .1, 0);
+			bassEnv.gain.setTargetAtTime(1, at, bass.Attack / 1000);
+			bassEnv.gain.setTargetAtTime(0, at + (bass.Attack / 1000), bass.Decay / 1000);
 		}
 	}
 
+	var bassNoteHash = ["off", "E", "F", "F#", "G", "G#", "A", "A#", "B", "C", "C#", "D", "D#", "E2"];
 	bass.LoadSequence = function(sequence) {
 		$(".bass-sequencer-lane > .note").data("on", 0);
 
 		for (var i = 0; i < sequence.length; i++) {
-			$("#bass-" + sequence[i].when).val(sequence[i].what).data("on", sequence[i].when);
+			$("#bass-" + sequence[i].when).val(bassNoteHash.indexOf(sequence[i].what)).data("on", sequence[i].when).trigger("change");
 		}
 	}
 
@@ -431,7 +435,12 @@ Engine = function(context) {
 		$('<span class="note"></span>').data("note", new self.Poly.Note("C#", 0, 11)).appendTo($("#poly-lane-cs"));
 		$('<span class="note"></span>').data("note", new self.Poly.Note("C", 0, 12)).appendTo($("#poly-lane-c"));
 
-		$('<input id="bass-' + (i + 1) + '" value="off" class="note">').data("note", new self.Bass.Note("bass-" + (i + 1))).appendTo($("#bass-sequencer-lane"));
+	}
+
+	for (var j = 0; j < 2; j++) {
+		for (var i = 1; i <= 16; i++) {
+			$('<input id="bass-' + (16 * j + i) + '" value="off" class="note">').data("note", new self.Bass.Note("bass-" + (16 * j + i))).appendTo($("#bass-sequencer-lane-" + (j + 1)));
+		}
 	}
 
 	this.LoadSequence = function() {
@@ -460,13 +469,12 @@ Engine = function(context) {
 		});
 	}
 
-	this.SetupUI = function() {
-		var master_knob_width = 40;
-		var master_knob_height = 40;
-		var dynamics_knob_width = 40;
-		var dynamics_knob_height = 40;
-		var bass_note_knob_height = 25;
-		var bass_note_knob_width = 25;
+		var master_knob_width = 50;
+		var master_knob_height = 50;
+		var dynamics_knob_width = 50;
+		var dynamics_knob_height = 50;
+		var bass_note_knob_height = 40;
+		var bass_note_knob_width = 40;
 		var drum_control_knob_width = 50;
 		var poly_control_knob_width = 50;
 		var poly_control_knob_height = 50;
@@ -610,22 +618,77 @@ Engine = function(context) {
 			"bgColor": "rgb(200,200,200)",
 			"inputColor": "#FFFFFF",
 			"font": "monospace",
-			"step": 1, 
+			"step": 1,
 			"change": function(v) { self.Poly.LP.frequency.value = v / 100; }
 		});
 
 		// bass
-		var bassNoteHash = ["off", "E", "F", "F#", "G", "G#", "A", "A#", "B", "C", "C#", "D", "D#", "E2"];
-		for (var i = 0; i <= 32; i++) {
+		for (var i = 1; i <= 32; i++) {
 			$("#bass-" + i).val(0).knob({
 				"width": bass_note_knob_width,
 				"height": bass_note_knob_height,
 				"min": 0,
 				"max": 13,
+				"fgColor": "rgb(203, 75, 22)",
+				"bgColor": "rgb(200,200,200)",
+				"inputColor": "#FFFFFF",
+				"font": "monospace",
 				"step": 1,
 				"draw": function() { this.$.val(bassNoteHash[this.$.val()]); }
 			});
 		}
+
+		$("#bass-env-decay").val(self.Bass.Decay).knob({
+			"width": bass_note_knob_width,
+			"height": bass_note_knob_height,
+			"min": 50,
+			"max": 2000,
+			"fgColor": "#FFFFFF",
+			"bgColor": "rgb(200,200,200)",
+			"inputColor": "#FFFFFF",
+			"font": "monospace",
+			"step": 1,
+			"change": function(v) { self.Bass.Decay = v; }
+		});
+
+		$("#bass-env-attack").val(self.Bass.Attack).knob({
+			"width": bass_note_knob_width,
+			"height": bass_note_knob_height,
+			"min": 0,
+			"max": 200,
+			"fgColor": "#FFFFFF",
+			"bgColor": "rgb(200,200,200)",
+			"inputColor": "#FFFFFF",
+			"font": "monospace",
+			"step": 1,
+			"change": function(v) { self.Bass.Attack = v; }
+		});
+
+		$("#bass-filter-freq").val(self.Bass.LP.frequency.value).knob({
+			"width": bass_note_knob_width,
+			"height": bass_note_knob_height,
+			"min": 200,
+			"max": 1000,
+			"fgColor": "#FFFFFF",
+			"bgColor": "rgb(200,200,200)",
+			"inputColor": "#FFFFFF",
+			"font": "monospace",
+			"step": 1,
+			"change": function(v) { self.Bass.LP.frequency.value = v; }
+		});
+
+		$("#bass-filter-q").val(self.Bass.LP.Q.value).knob({
+			"width": bass_note_knob_width,
+			"height": bass_note_knob_height,
+			"min": 0,
+			"max": 50,
+			"fgColor": "#FFFFFF",
+			"bgColor": "rgb(200,200,200)",
+			"inputColor": "#FFFFFF",
+			"font": "monospace",
+			"step": 1,
+			"change": function(v) { self.Bass.LP.Q.value = v; }
+		});
 
 		$(".note").click(function() { 
 			var self = this;
@@ -638,5 +701,5 @@ Engine = function(context) {
 				$(self).css("background-color", ColorRed);
 			}
 		});
-	}
+
 }

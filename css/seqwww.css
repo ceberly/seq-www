@@ -36,8 +36,8 @@ body {
 
 #drummachine-name {
 	display: inline-block;
-	margin-left: 90%;
-	font-size: 2em;
+	margin-left: 83%;
+	font-size: 1.5em;
 }
 
 .drummachine-sequencer-label {
@@ -58,15 +58,34 @@ body {
 
 #bass {
 	width: 100%;
-	height: 10%;
+	height: 25%;
 	background-color: #93a1a1;
+}
+
+#bass-controls {
+	width: 20%;
+	float: right;
+	font-size: .75em;
+}
+
+#bass-sequencer {
+	width: 80%;
+	height: 100%;
+	float: left;
+}
+
+.bass-sequencer-lane {
+	width: 100%;
+}
+
+.bass-sequencer-lane > div {
+	margin-left: 1%;
 }
 
 #poly {
 	background-color: #268bd2;
 	color: white;
-	height: 60%;
-	padding-bottom: 2%;
+	height: 50%;
 }
 
 #poly-name {
@@ -87,8 +106,7 @@ body {
 #poly-sequencer {
 	float: left;
 	width: 80%;
-	padding-top: 2em;
-	height: 95%;
+	height: 100%;
 }
 
 .poly-sequencer-lane {
