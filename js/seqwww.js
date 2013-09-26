@@ -60,19 +60,19 @@ Engine = function(context) {
 
 
 	this.Bus.HighPass.type = "highpass";
-	this.Bus.HighPass.frequency.value = 100;
+	this.Bus.HighPass.frequency.value = 80;
 
 	this.Bus.Peaking.type = "peaking";
 	this.Bus.Peaking.frequency.value = 8000;
-	this.Bus.Peaking.gain.value = 0;
+	this.Bus.Peaking.gain.value = 2;
 
 	this.Bus.LowPass.type = "lowpass";
 	this.Bus.LowPass.frequency.value = 20000;
 
-	this.Bus.Comp.threshold = -10;
-	this.Bus.Comp.ratio.value = 4;
-	this.Bus.Comp.attack.value = .01;
-	this.Bus.Comp.release.value = .5;
+	this.Bus.Comp.threshold = -40;
+	this.Bus.Comp.ratio.value = 8;
+	this.Bus.Comp.attack.value = .09;
+	this.Bus.Comp.release.value = .4;
 
 	this.Bus.Input = this.Bus.HighPass;
 
@@ -112,7 +112,7 @@ Engine = function(context) {
 		},
 	};
 
-	this.DrumMachine.MasterGain.gain.value = .3333333;
+	this.DrumMachine.MasterGain.gain.value = .87;
 	this.DrumMachine.MasterGain.connect(bus.Input);
 
 	var drummachine = this.DrumMachine;
@@ -131,6 +131,11 @@ Engine = function(context) {
 	this.DrumMachine.SD.Gain.connect(this.DrumMachine.MasterGain);
 	this.DrumMachine.OH.Gain.connect(this.DrumMachine.MasterGain);
 	this.DrumMachine.CH.Gain.connect(this.DrumMachine.MasterGain);
+
+	this.DrumMachine.BD.Gain.gain.value = 1;
+	this.DrumMachine.SD.Gain.gain.value = .44;
+	this.DrumMachine.CH.Gain.gain.value = .38;
+	this.DrumMachine.OH.Gain.gain.value = .84;
 
 	//BD
 	var bdEnv = context.createGain();
@@ -366,18 +371,18 @@ Engine = function(context) {
 		LP: context.createBiquadFilter(),
 		Osc: context.createOscillator(),
 		Gain: context.createGain(),
-		Attack: 50, // ms
-		Decay: 500, // ms
+		Attack: 7, // ms
+		Decay: 300, // ms
 	}
 
 	var bass = this.Bass;
 
 	bass.Gain.connect(bus.Input);
-	bass.Gain.gain.value = .5;
+	bass.Gain.gain.value = .14;
 	bass.LP.connect(this.Bass.Gain);
 
-	bass.LP.frequency.value = 500;
-	bass.LP.Q.value = 2;
+	bass.LP.frequency.value = 800;
+	bass.LP.Q.value = 24;
 
 	var bassEnv = context.createGain();
 	bassEnv.connect(bass.LP);
@@ -417,22 +422,22 @@ Engine = function(context) {
 		Osc2Gain: context.createGain(),
 		Octave: 0,
 		Attack: 60, // ms
-		Decay: 400, // ms
-		Sustain: 1, // gain multiplier
-		Release: 400, // ms 
+		Decay: 130, // ms
+		Sustain: .28, // gain multiplier
+		Release: 1700, // ms 
 	};
 
-	this.Poly.MasterGain.gain.value = .25;
+	this.Poly.MasterGain.gain.value = .17;
 	this.Poly.MasterGain.connect(bus.Input);
 
 	this.Poly.LP.connect(this.Poly.MasterGain);
-	this.Poly.LP.frequency.value = 2000;
-	this.Poly.LP.Q.value = 1;
+	this.Poly.LP.frequency.value = 2260;
+	this.Poly.LP.Q.value = 7;
 
 	this.Poly.Osc1Gain.connect(this.Poly.LP);
 	this.Poly.Osc2Gain.connect(this.Poly.LP);
-	this.Poly.Osc1Gain.gain.value = .8;
-	this.Poly.Osc2Gain.gain.value = .2;
+	this.Poly.Osc1Gain.gain.value = .6;
+	this.Poly.Osc2Gain.gain.value = .4;
 
 	var poly = this.Poly;
 
@@ -743,7 +748,7 @@ Engine = function(context) {
 		"width": poly_control_knob_width,
 		"height": poly_control_knob_height,
 		"min": 0,
-		"max": 500,
+		"max": 2000,
 		"fgColor": "#FFFFFF",
 		"bgColor": "rgb(200,200,200)",
 		"inputColor": "#FFFFFF",
@@ -770,7 +775,7 @@ Engine = function(context) {
 		"width": poly_control_knob_width,
 		"height": poly_control_knob_height,
 		"min": 10,
-		"max": 500,
+		"max": 2000,
 		"fgColor": "#FFFFFF",
 		"bgColor": "rgb(200,200,200)",
 		"inputColor": "#FFFFFF",
