@@ -471,34 +471,35 @@ Engine = function(context) {
 	};
 
 	for (var i = 0; i < 32; i++) {
-		$('<span class="note"></span>').data("note", self.DrumMachine.CH).appendTo($("#drummachine-sequencer-oh"));
-		$('<span class="note"></span>').data("note", self.DrumMachine.CH).appendTo($("#drummachine-sequencer-ch"));
-		$('<span class="note"></span>').data("note", self.DrumMachine.SD).appendTo($("#drummachine-sequencer-sd"));
-		$('<span class="note"></span>').data("note", self.DrumMachine.BD).appendTo($("#drummachine-sequencer-bd"));
+		$('<td class="note">&nbsp;&nbsp;</td>').data("note", self.DrumMachine.CH).appendTo($("#drummachine-sequencer-oh"));
+		$('<td class="note">&nbsp;&nbsp;</td>').data("note", self.DrumMachine.CH).appendTo($("#drummachine-sequencer-ch"));
+		$('<td class="note">&nbsp;&nbsp;</td>').data("note", self.DrumMachine.SD).appendTo($("#drummachine-sequencer-sd"));
+		$('<td class="note">&nbsp;&nbsp;</td>').data("note", self.DrumMachine.BD).appendTo($("#drummachine-sequencer-bd"));
 
-		$('<span class="note"></span>').data("note", new self.Poly.Note("B", 1, 0)).appendTo($("#poly-lane-b"));
-		$('<span class="note"></span>').data("note", new self.Poly.Note("A#", 1, 1)).appendTo($("#poly-lane-as"));
-		$('<span class="note"></span>').data("note", new self.Poly.Note("A", 1, 2)).appendTo($("#poly-lane-a"));
-		$('<span class="note"></span>').data("note", new self.Poly.Note("G#", 1, 3)).appendTo($("#poly-lane-gs"));
-		$('<span class="note"></span>').data("note", new self.Poly.Note("G", 1, 4)).appendTo($("#poly-lane-g"));
-		$('<span class="note"></span>').data("note", new self.Poly.Note("F#", 1, 5)).appendTo($("#poly-lane-fs"));
-		$('<span class="note"></span>').data("note", new self.Poly.Note("F", 1, 6)).appendTo($("#poly-lane-f"));
-		$('<span class="note"></span>').data("note", new self.Poly.Note("E", 1, 7)).appendTo($("#poly-lane-e"));
-		$('<span class="note"></span>').data("note", new self.Poly.Note("E", 2, 8)).appendTo($("#poly-lane-e2"));
-		$('<span class="note"></span>').data("note", new self.Poly.Note("D#", 1, 9)).appendTo($("#poly-lane-ds"));
-		$('<span class="note"></span>').data("note", new self.Poly.Note("D", 1, 10)).appendTo($("#poly-lane-d"));
-		$('<span class="note"></span>').data("note", new self.Poly.Note("C#", 1, 11)).appendTo($("#poly-lane-cs"));
-		$('<span class="note"></span>').data("note", new self.Poly.Note("C", 1, 12)).appendTo($("#poly-lane-c"));
-
+		$('<td class="note">&nbsp;&nbsp;</td>').data("note", new self.Poly.Note("B", 1, 0)).appendTo($("#poly-lane-b"));
+		$('<td class="note">&nbsp;&nbsp;</td>').data("note", new self.Poly.Note("A#", 1, 1)).appendTo($("#poly-lane-as"));
+		$('<td class="note">&nbsp;&nbsp;</td>').data("note", new self.Poly.Note("A", 1, 2)).appendTo($("#poly-lane-a"));
+		$('<td class="note">&nbsp;&nbsp;</td>').data("note", new self.Poly.Note("G#", 1, 3)).appendTo($("#poly-lane-gs"));
+		$('<td class="note">&nbsp;&nbsp;</td>').data("note", new self.Poly.Note("G", 1, 4)).appendTo($("#poly-lane-g"));
+		$('<td class="note">&nbsp;&nbsp;</td>').data("note", new self.Poly.Note("F#", 1, 5)).appendTo($("#poly-lane-fs"));
+		$('<td class="note">&nbsp;&nbsp;</td>').data("note", new self.Poly.Note("F", 1, 6)).appendTo($("#poly-lane-f"));
+		$('<td class="note">&nbsp;&nbsp;</td>').data("note", new self.Poly.Note("E", 1, 7)).appendTo($("#poly-lane-e"));
+		$('<td class="note">&nbsp;&nbsp;</td>').data("note", new self.Poly.Note("E", 2, 8)).appendTo($("#poly-lane-e2"));
+		$('<td class="note">&nbsp;&nbsp;</td>').data("note", new self.Poly.Note("D#", 1, 9)).appendTo($("#poly-lane-ds"));
+		$('<td class="note">&nbsp;&nbsp;</td>').data("note", new self.Poly.Note("D", 1, 10)).appendTo($("#poly-lane-d"));
+		$('<td class="note">&nbsp;&nbsp;</td>').data("note", new self.Poly.Note("C#", 1, 11)).appendTo($("#poly-lane-cs"));
+		$('<td class="note">&nbsp;&nbsp;</td>').data("note", new self.Poly.Note("C", 1, 12)).appendTo($("#poly-lane-c"));
 	}
 
 	for (var j = 0; j < 2; j++) {
 		for (var i = 1; i <= 16; i++) {
-			$('<input id="bass-' + (16 * j + i) + '" value="off" class="note">').data("note", new self.Bass.Note("bass-" + (16 * j + i))).appendTo($("#bass-sequencer-lane-" + (j + 1)));
+			var n = $('<input id="bass-' + (16 * j + i) + '" value="off" class="note">').data("note", new self.Bass.Note("bass-" + (16 * j + i)));
+			var td = $("<td>").append(n).append("</td>");
+			$("#bass-sequencer-lane-" + (j + 1)).append(td);
 		}
 	}
 
-	this.LoadSequence = function() {
+	this.Go = function() {
 		// assume 8th notes for the time being.
 		var t = false;
 		$("#sequencer-start").click(function() {
@@ -601,8 +602,19 @@ Engine = function(context) {
 		"bgColor": "rgb(200,200,200)",
 		"inputColor": "#FFFFFF",
 		"font": "monospace",
-		"value": this.Bus.Comp.ratio.value,
 		"change": function(v) { bus.Comp.ratio.value = v; }
+	});
+
+	$("#master-comp-threshold> input").val(bus.Comp.threshold.value).knob({
+		"width": dynamics_knob_width,
+		"height": dynamics_knob_height,
+		"min": bus.Comp.threshold.minValue,
+		"max": bus.Comp.threshold.maxValue,
+		"fgColor": "#FFFFFF",
+		"bgColor": "rgb(200,200,200)",
+		"inputColor": "#FFFFFF",
+		"font": "monospace",
+		"change": function(v) { bus.Comp.threshold.value = v; }
 	});
 
 	$("#master-comp-attack > input").val(parseInt(bus.Comp.attack.value * 1000)).knob({
