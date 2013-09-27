@@ -3,7 +3,7 @@ seq-www
 
 Toy instruments that use the web audio API. 
 
-seq-www includes a drum machine, a poly synth and a mono bassline generator. It is done entirely using the web audio API's oscillator's, filters, and noise. There are no samples.
+seq-www includes a drum machine, a poly synth and a mono bassline generator. It is done entirely using the web audio API's oscillators, filters, and noise. There are no samples.
 
 Please feel free to do whatever you want with this code, though it is governed by an MIT style license that you can find in the accompanying LICENSE file.
 
