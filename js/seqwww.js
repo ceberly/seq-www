@@ -4,12 +4,18 @@ ColorBase1 = "rgb(147, 161, 161)";
 ColorWhite = "rgb(255, 255, 255)";
 ColorBase2 = "rgb(238, 232, 213)";
 
-DrumSound = {
+var SeqDrumSound = {
 	BD: "BD",
 	SD: "SD",
 	CH: "CH",
 	OH: "OH",
 };
+
+var SeqInstruments = {
+	Drum78: 0,
+	BluePlanet: 1,
+	Bassline: 2,
+}
 
 function freqFromCanonical(canonical) {
 	switch(canonical) {
@@ -89,19 +95,19 @@ Engine = function(context) {
 			$(".drummachine-lane > .note").data("on", 0);
 			for (var i = 0; i < sequence.length; i++) {
 				switch (sequence[i].what) {
-					case DrumSound.BD:
+					case SeqDrumSound.BD:
 						$($("#drummachine-sequencer-bd > .note")[sequence[i].when - 1]).data("on", sequence[i].when);
 						$($("#drummachine-sequencer-bd > .note")[sequence[i].when - 1]).css("background-color", ColorRed);
 						break;
-					case DrumSound.SD:
+					case SeqDrumSound.SD:
 						$($("#drummachine-sequencer-sd > .note")[sequence[i].when - 1]).data("on", sequence[i].when);
 						$($("#drummachine-sequencer-sd > .note")[sequence[i].when - 1]).css("background-color", ColorRed);
 						break;
-					case DrumSound.CH:
+					case SeqDrumSound.CH:
 						$($("#drummachine-sequencer-ch > .note")[sequence[i].when - 1]).data("on", sequence[i].when);
 						$($("#drummachine-sequencer-ch > .note")[sequence[i].when - 1]).css("background-color", ColorRed);
 						break;
-					case DrumSound.OH:
+					case SeqDrumSound.OH:
 						$($("#drummachine-sequencer-oh > .note")[sequence[i].when - 1]).data("on", sequence[i].when);
 						$($("#drummachine-sequencer-oh > .note")[sequence[i].when - 1]).css("background-color", ColorRed);
 						break;
@@ -535,7 +541,21 @@ Engine = function(context) {
 		}
 	}
 
-	this.Go = function() {
+	this.Go = function(defaultPatterns) {
+		for (var i = 0; i < defaultPatterns.length; i++) {
+			switch (defaultPatterns[i].instrument) {
+				case SeqInstruments.Drum78:
+					self.DrumMachine.LoadSequence(defaultPatterns[i].p);
+					break;
+				case SeqInstruments.BluePlanet:
+					self.Poly.LoadSequence(defaultPatterns[i].p);
+					break;
+				case SeqInstruments.Bassline:
+					self.Bass.LoadSequence(defaultPatterns[i].p);
+					break;
+			}
+		}
+
 		// assume 8th notes for the time being.
 		var t = false;
 		$("#sequencer-start").click(function() {
