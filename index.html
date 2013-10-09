@@ -4,6 +4,7 @@
 
 		<script src="/js/knob.js"></script>
 		<script src="/js/seqwww.js"></script>
+		<script src="/js/drum78.js"></script>
 		<script src="/js/patterns.js"></script>
 		<link rel="stylesheet" type="text/css" href="/css/seqwww.css">
 		<script>
@@ -12,9 +13,9 @@
 					window.AudioContext = window.AudioContext || window.webkitAudioContext;
 					var context = new AudioContext();
 
-					engine = new Engine(context);
+					engine = new SeqEngine(context);
 					
-					engine.Go(SeqPatterns);
+					engine.Go([new SeqDrum78(engine, $("#drummachine"))], SeqPatterns);
 				}
 				catch(e) {
 					document.write("<h2>Sorry, web audio is not supported by this browser</h2>");
@@ -28,46 +29,11 @@
 
 		<div id="instruments">
 			<div id="drummachine">
-				<table id="drummachine-controls">
-					<tr>
-						<td colspan="2" id="drummachine-name" style="text-align: right;">drum-78</td>
-					</tr>
-					<tr>
-						<td>bass</td>
-						<td>snare</td>
-					</tr>
-					<tr>
-						<td><input id="drummachine-bd-gain" type="text"></td>
-						<td><input id="drummachine-sd-gain" type="text"></td>
-					</tr>
-					<tr>
-						<td>closed hh</td>
-						<td>open hh</td>
-					</tr>
-					<tr>
-						<td><input id="drummachine-ch-gain" type="text"></td>
-						<td><input id="drummachine-oh-gain" type="text"></td>
-					</tr>
-				</table>
-				<table id="drummachine-sequencer">
-					<tr class="drummachine-lane" id="drummachine-sequencer-oh">
-						<td class="drummachine-sequencer-label">OH</td> 
-					</tr>
-					<tr class="drummachine-lane" id="drummachine-sequencer-ch">
-						<td class="drummachine-sequencer-label">CH</td> 
-					</tr>
-					<tr class="drummachine-lane" id="drummachine-sequencer-sd">
-						<td class="drummachine-sequencer-label">SD</td> 
-					</tr>
 
-					<tr class="drummachine-lane" id="drummachine-sequencer-bd">
-						<td class="drummachine-sequencer-label">BD</td> 
-					</tr>
-				</table>
 
 			</div>
 
-			<div id="poly">
+			<!--<div id="poly">
 				<table id="poly-controls">
 					<tr>
 						<td colspan="2" id="poly-name" style="text-align: right;">blue planet</td>
@@ -173,7 +139,7 @@
 					<tr class="bass-sequencer-lane" id="bass-sequencer-lane-1"></tr>
 					<tr class="bass-sequencer-lane" id="bass-sequencer-lane-2"></tr>
 				</table>
-			</div>
+			</div> -->
 		</div>
 		<div id="master">
 			<table id="transport">

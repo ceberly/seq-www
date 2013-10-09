@@ -53,9 +53,11 @@ function freqFromCanonical(canonical) {
 	return 0;
 }
 
-Engine = function(context) {
+SeqEngine = function(context) {
 	var self = this;
 	self.Tempo = 100;
+
+	self.context = context;
 
 	this.Bus = {
 		Comp: context.createDynamicsCompressor(),
@@ -88,290 +90,6 @@ Engine = function(context) {
 	this.Bus.HighPass.connect(this.Bus.Peaking);
 
 	var bus = this.Bus;
-
-	this.DrumMachine = {
-		MasterGain: context.createGain(),
-		LoadSequence: function(sequence) {
-			$(".drummachine-lane > .note").data("on", 0);
-			for (var i = 0; i < sequence.length; i++) {
-				switch (sequence[i].what) {
-					case SeqDrumSound.BD:
-						$($("#drummachine-sequencer-bd > .note")[sequence[i].when - 1]).data("on", sequence[i].when);
-						$($("#drummachine-sequencer-bd > .note")[sequence[i].when - 1]).css("background-color", ColorRed);
-						break;
-					case SeqDrumSound.SD:
-						$($("#drummachine-sequencer-sd > .note")[sequence[i].when - 1]).data("on", sequence[i].when);
-						$($("#drummachine-sequencer-sd > .note")[sequence[i].when - 1]).css("background-color", ColorRed);
-						break;
-					case SeqDrumSound.CH:
-						$($("#drummachine-sequencer-ch > .note")[sequence[i].when - 1]).data("on", sequence[i].when);
-						$($("#drummachine-sequencer-ch > .note")[sequence[i].when - 1]).css("background-color", ColorRed);
-						break;
-					case SeqDrumSound.OH:
-						$($("#drummachine-sequencer-oh > .note")[sequence[i].when - 1]).data("on", sequence[i].when);
-						$($("#drummachine-sequencer-oh > .note")[sequence[i].when - 1]).css("background-color", ColorRed);
-						break;
-					default:
-						console.log("Unexpected drum sound: " + sequence[i].what.toString());
-				}
-			}
-		},
-	};
-
-	this.DrumMachine.MasterGain.gain.value = .87;
-	this.DrumMachine.MasterGain.connect(bus.Input);
-
-	var drummachine = this.DrumMachine;
-	drummachine.Off = function() {
-		drummachine.BD.Off();
-		drummachine.SD.Off();
-		drummachine.CH.Off();
-	}
-
-	this.DrumMachine.BD = { Gain: context.createGain() };
-	this.DrumMachine.SD = { Gain: context.createGain() };
-	this.DrumMachine.CH = { Gain: context.createGain() };
-	this.DrumMachine.OH = { Gain: context.createGain() };
-
-	this.DrumMachine.BD.Gain.connect(this.DrumMachine.MasterGain);
-	this.DrumMachine.SD.Gain.connect(this.DrumMachine.MasterGain);
-	this.DrumMachine.OH.Gain.connect(this.DrumMachine.MasterGain);
-	this.DrumMachine.CH.Gain.connect(this.DrumMachine.MasterGain);
-
-	this.DrumMachine.BD.Gain.gain.value = 1;
-	this.DrumMachine.SD.Gain.gain.value = .44;
-	this.DrumMachine.CH.Gain.gain.value = .38;
-	this.DrumMachine.OH.Gain.gain.value = .84;
-
-	//BD
-	var bdEnv = context.createGain();
-	bdEnv.gain.value = 0;
-	bdEnv.connect(this.DrumMachine.BD.Gain);
-
-	var bdLP = context.createBiquadFilter();
-	bdLP.frequency.value = 100;
-	bdLP.Q.value = 0;
-	bdLP.connect(bdEnv);
-
-	var bdOsc1 = context.createOscillator();
-	bdOsc1.frequency.value = 65;
-	bdOsc1.connect(bdEnv);
-	bdOsc1.start(0);
-
-	var bdOsc2 = context.createOscillator();
-	bdOsc2.type = "square";
-	bdOsc2.frequency.value = 65;
-	bdOsc2.connect(bdLP);
-	bdOsc2.start(0);
-
-	this.DrumMachine.BD.Trigger = function(at) {
-		bdEnv.gain.setTargetAtTime(1, at, .01);
-		bdEnv.gain.setTargetAtTime(0, at + .05, .03);
-	};
-
-	this.DrumMachine.BD.Off = function() {
-		bdEnv.gain.cancelScheduledValues(0);
-		bdEnv.gain.value = 0;
-	}
-
-	//SD
-	var sdGate = context.createGain();
-	sdGate.gain.value = 0;
-	sdGate.connect(this.DrumMachine.SD.Gain);
-
-	var sdWNEnv = context.createGain();
-	sdWNEnv.connect(sdGate);
-	sdWNEnv.gain.value = 0;
-
-	var sdOsc1Env = context.createGain();
-	sdOsc1Env.connect(this.DrumMachine.SD.Gain);
-	sdOsc1Env.gain.value = 0;
-
-	var sdOsc2Env = context.createGain();
-	sdOsc2Env.connect(this.DrumMachine.SD.Gain);
-	sdOsc2Env.gain.value = 0;
-
-	var sdHP = context.createBiquadFilter();
-	sdHP.type = "highpass";
-	sdHP.frequency.value = 10000;
-	sdHP.connect(sdGate);
-
-	var sdLP = context.createBiquadFilter();
-	sdLP.type = "lowpass";
-	sdLP.frequency.value = 8000;
-	sdLP.connect(sdHP);
-	sdLP.connect(sdWNEnv);
-
-	// borrowed from https://developer.tizen.org/documentation/articles/advanced-web-audio-api-usage
-	var whiteNoiseBuffer = context.createBuffer(1, 44100, 44100);
-	var data = whiteNoiseBuffer.getChannelData(0);
-	for (var i = 0; i < data.length; i++) {
-		data[i] = (Math.random() - 0.5) * 2;
-	}
-
-	var whiteNoise = context.createBufferSource();
-	whiteNoise.loop = true;
-	whiteNoise.buffer = whiteNoiseBuffer;
-	whiteNoise.connect(sdLP);
-	whiteNoise.start(0);
-
-	var sdOsc1 = context.createOscillator();
-	sdOsc1.type = "sine";
-	sdOsc1.connect(sdOsc1Env);
-	sdOsc1.frequency.value = 330;
-	sdOsc1.start(0);
-
-	var sdOsc2 = context.createOscillator();
-	sdOsc2.type = "sine";
-	sdOsc2.connect(sdOsc2Env);
-	sdOsc2.frequency.value = 180;
-	sdOsc2.start(0);
-
-	var sd = this.DrumMachine.SD;
-	this.DrumMachine.SD.Trigger = function(at) {
-		sdGate.gain.setTargetAtTime(.5, at, 0);
-		sdGate.gain.setTargetAtTime(0, at + .03, .03);
-
-		sdOsc1Env.gain.setTargetAtTime(.25, at, 0);
-		sdOsc1Env.gain.setTargetAtTime(0, at + .03, .03);
-
-		sdOsc2Env.gain.setTargetAtTime(.25, at, 0);
-		sdOsc2Env.gain.setTargetAtTime(0, at + .03, .03);
-	};
-
-	this.DrumMachine.SD.Off = function() {
-		sdGate.gain.cancelScheduledValues(0);
-		sdOsc1Env.gain.cancelScheduledValues(0);
-		sdOsc2Env.gain.cancelScheduledValues(0);
-
-		sdGate.gain.value = 0;	
-		sdOsc1Env.gain.value = 0;	
-		sdOsc2Env.gain.value = 0;	
-	}
-
-	var ohGate = context.createGain();
-	ohGate.gain.value = 0;
-	ohGate.connect(this.DrumMachine.OH.Gain);
-
-	var chGate = context.createGain();
-	chGate.gain.value = 0;
-	chGate.connect(this.DrumMachine.CH.Gain);
-
-	//CH
-	var chHP = context.createBiquadFilter();
-	chHP.connect(chGate);
-	chHP.connect(ohGate);
-	chHP.type = "highpass";
-	chHP.frequency.value = 10000;
-
-	// high bandpass
-	var chHGain1 = context.createGain();
-	chHGain1.connect(chHP);
-	chHGain1.gain.value = 0;
-
-	var chHGain2 = context.createGain();
-	chHGain2.connect(chHP);
-	chHGain2.gain.value = 0;
-
-	var chHBP = context.createBiquadFilter();
-	chHBP.type = "bandpass";
-	chHBP.frequency.value = 7000;
-	chHBP.Q.value = 12;
-	chHBP.connect(chHGain1);
-	chHBP.connect(chHGain2);
-
-	// low bandpass
-	var chLBGain = context.createGain();
-	chLBGain.connect(chHP);
-	chLBGain.gain.value = 0;
-
-	var chLBP = context.createBiquadFilter();
-	chLBP.type = "bandpass";
-	chLBP.frequency.value = 3500;
-	chLBP.Q.value = 12;
-	chLBP.connect(chLBGain);
-
-	var chOsc1 = context.createOscillator();
-	chOsc1.type = "square";
-	chOsc1.frequency.value = 303;
-	chOsc1.connect(chLBP);
-	chOsc1.connect(chHBP);
-	chOsc1.start(0);
-
-	var chOsc2 = context.createOscillator();
-	chOsc2.type = "square";
-	chOsc2.frequency.value = 176;
-	chOsc2.connect(chLBP);
-	chOsc2.connect(chHBP);
-	chOsc2.start(0);
-
-	var chOsc3 = context.createOscillator();
-	chOsc3.type = "square";
-	chOsc3.frequency.value = 214;
-	chOsc3.connect(chLBP);
-	chOsc3.connect(chHBP);
-	chOsc3.start(0);
-
-	var chOsc4 = context.createOscillator();
-	chOsc4.type = "square";
-	chOsc4.frequency.value = 119;
-	chOsc4.connect(chLBP);
-	chOsc4.connect(chHBP);
-	chOsc4.start(0);
-
-	var chOsc5 = context.createOscillator();
-	chOsc5.type = "square";
-	chOsc5.frequency.value = 540;
-	chOsc5.connect(chLBP);
-	chOsc5.connect(chHBP);
-	chOsc5.start(0);
-
-	var chOsc6 = context.createOscillator();
-	chOsc6.type = "square";
-	chOsc6.frequency.value = 800;
-	chOsc6.connect(chLBP);
-	chOsc6.connect(chHBP);
-	chOsc6.start(0);
-
-	var ch = this.DrumMachine.CH;
-	var oh = this.DrumMachine.OH;
-	this.DrumMachine.CH.Trigger = function(at) {
-		ohGate.gain.value = 0; // silence open hat
-		chGate.gain.value = 1; // open closed hat gate 
-
-		chHGain1.gain.setTargetAtTime(1 / 3, at, 0);
-		chHGain1.gain.setTargetAtTime(0, at + .01, .01);
-
-		chHGain2.gain.setTargetAtTime(1 / 3, at, 0);
-		chHGain2.gain.setTargetAtTime(0, at + .02, .01);
-
-		chLBGain.gain.setTargetAtTime(1 / 3, at, 0);
-		chLBGain.gain.setTargetAtTime(0, at + .02, .01);
-	};
-
-	this.DrumMachine.OH.Trigger = function(at) {
-		chGate.gain.value = 0; // silence closed hat
-		ohGate.gain.value = 1; // open open hat gate
-
-		chHGain1.gain.setTargetAtTime(1 / 3, at, 0);
-		chHGain1.gain.setTargetAtTime(0, at + .5, 1);
-
-		chHGain2.gain.setTargetAtTime(1 / 3, at, 0);
-		chHGain2.gain.setTargetAtTime(0, at + .5, 1);
-
-		chLBGain.gain.setTargetAtTime(1 / 3, at, 0);
-		chLBGain.gain.setTargetAtTime(0, at + .5, 1);
-	};
-
-	this.DrumMachine.CH.Off = function() {
-		chHGain1.gain.cancelScheduledValues(0);
-		chHGain2.gain.cancelScheduledValues(0);
-		chLBGain.gain.cancelScheduledValues(0);
-
-		chHGain1.gain.value = 0;
-		chHGain2.gain.value = 0;
-		chLBGain.gain.value = 0;
-	};
 
 	this.Bass = {
 		LP: context.createBiquadFilter(),
@@ -513,11 +231,6 @@ Engine = function(context) {
 	};
 
 	for (var i = 0; i < 32; i++) {
-		$('<td class="note">&nbsp;&nbsp;</td>').data("note", self.DrumMachine.OH).appendTo($("#drummachine-sequencer-oh"));
-		$('<td class="note">&nbsp;&nbsp;</td>').data("note", self.DrumMachine.CH).appendTo($("#drummachine-sequencer-ch"));
-		$('<td class="note">&nbsp;&nbsp;</td>').data("note", self.DrumMachine.SD).appendTo($("#drummachine-sequencer-sd"));
-		$('<td class="note">&nbsp;&nbsp;</td>').data("note", self.DrumMachine.BD).appendTo($("#drummachine-sequencer-bd"));
-
 		$('<td class="note">&nbsp;&nbsp;</td>').data("note", new self.Poly.Note("B", 1, 0)).appendTo($("#poly-lane-b"));
 		$('<td class="note">&nbsp;&nbsp;</td>').data("note", new self.Poly.Note("A#", 1, 1)).appendTo($("#poly-lane-as"));
 		$('<td class="note">&nbsp;&nbsp;</td>').data("note", new self.Poly.Note("A", 1, 2)).appendTo($("#poly-lane-a"));
@@ -541,18 +254,11 @@ Engine = function(context) {
 		}
 	}
 
-	this.Go = function(defaultPatterns) {
-		for (var i = 0; i < defaultPatterns.length; i++) {
-			switch (defaultPatterns[i].instrument) {
-				case SeqInstruments.Drum78:
-					self.DrumMachine.LoadSequence(defaultPatterns[i].p);
-					break;
-				case SeqInstruments.BluePlanet:
-					self.Poly.LoadSequence(defaultPatterns[i].p);
-					break;
-				case SeqInstruments.Bassline:
-					self.Bass.LoadSequence(defaultPatterns[i].p);
-					break;
+	this.Go = function(instruments, defaultPatterns) {
+		for (var i = 0; i < instruments.length; i++) {
+			instruments[i].Draw();
+			for (var j = 0; j < defaultPatterns.length; j++) {
+				instruments[i].LoadSequence(defaultPatterns[j]); // this kind of sucks.
 			}
 		}
 
@@ -700,55 +406,7 @@ Engine = function(context) {
 		"change": function(v) { bus.Comp.release.value = v / 1000; }
 	});
 
-	// drummachine
-	$("#drummachine-bd-gain").val(self.DrumMachine.BD.Gain.gain.value * 100).knob({
-		"width": poly_control_knob_width,
-		"height": poly_control_knob_height,
-		"min": 0,
-		"max": 100,
-		"fgColor": "orange",
-		"bgColor": "rgb(200,200,200)",
-		"inputColor": "white",
-		"font": "monospace",
-		"change": function(v) { self.DrumMachine.BD.Gain.gain.value = v / 100; }
-	});
-
-	$("#drummachine-sd-gain").val(self.DrumMachine.SD.Gain.gain.value * 100).knob({
-		"width": poly_control_knob_width,
-		"height": poly_control_knob_height,
-		"min": 0,
-		"max": 100,
-		"fgColor": "orange",
-		"bgColor": "rgb(200,200,200)",
-		"inputColor": "white",
-		"font": "monospace",
-		"change": function(v) { self.DrumMachine.SD.Gain.gain.value = v / 100; }
-	});
-
-	$("#drummachine-oh-gain").val(self.DrumMachine.OH.Gain.gain.value * 100).knob({
-		"width": poly_control_knob_width,
-		"height": poly_control_knob_height,
-		"min": 0,
-		"max": 100,
-		"fgColor": "orange",
-		"bgColor": "rgb(200,200,200)",
-		"inputColor": "white",
-		"font": "monospace",
-		"change": function(v) { self.DrumMachine.OH.Gain.gain.value = v / 100; }
-	});
-
-	$("#drummachine-ch-gain").val(self.DrumMachine.CH.Gain.gain.value * 100).knob({
-		"width": poly_control_knob_width,
-		"height": poly_control_knob_height,
-		"min": 0,
-		"max": 100,
-		"fgColor": "orange",
-		"bgColor": "rgb(200,200,200)",
-		"inputColor": "white",
-		"font": "monospace",
-		"change": function(v) { self.DrumMachine.CH.Gain.gain.value = v / 100; }
-	});
-
+	
 	// poly
 	$("#poly-env-attack").val(self.Poly.Attack).knob({
 		"width": poly_control_knob_width,
@@ -841,19 +499,6 @@ Engine = function(context) {
 		"font": "monospace",
 		"step": 1,
 		"change": function(v) { self.Poly.MasterGain.gain.value = v / 100; }
-	});
-
-	$("#drummachine-gain").val(parseInt(self.DrumMachine.MasterGain.gain.value * 100)).knob({
-		"width": dynamics_knob_width,
-		"height": dynamics_knob_height,
-		"min": 0,
-		"max": 100,
-		"fgColor": "#FFFFFF",
-		"bgColor": "rgb(200,200,200)",
-		"inputColor": "#FFFFFF",
-		"font": "monospace",
-		"step": 1,
-		"change": function(v) { self.DrumMachine.MasterGain.gain.value = v / 100; }
 	});
 
 	$("#bass-gain").val(self.Bass.Gain.gain.value * 100).knob({

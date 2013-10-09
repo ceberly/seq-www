@@ -1,5 +1,5 @@
 var SeqPatterns = [{
-	instrument: SeqInstruments.Drum78,
+	instrument: "Drum78",
 	p: [
 	{ what: SeqDrumSound.BD, when: 1 },
 	{ what: SeqDrumSound.OH, when: 1 },
